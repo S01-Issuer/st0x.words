@@ -46,8 +46,7 @@ contract LibOpERC4626AdversarialVaultTest is Test {
     /// must revert with LossyConversionToFloat, not silently corrupt the result.
     function testAdversarialConvertToAssetsReverts() external {
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(malVault)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(malVault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         // type(uint256).max / 10 fits in int256; exponent shifts by +1 because the
@@ -62,8 +61,7 @@ contract LibOpERC4626AdversarialVaultTest is Test {
     /// must revert with LossyConversionToFloat, not silently corrupt the result.
     function testAdversarialConvertToSharesReverts() external {
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(malVault)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(malVault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         vm.expectRevert(
