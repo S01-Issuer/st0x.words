@@ -14,18 +14,20 @@ library LibOpERC4626ConvertToAssets {
     }
 
     /// Runs the erc4626-convert-to-assets operation.
-    /// Reads the vault address and share amount from the stack, calls
+    /// Reads the vault address (raw stack bits) and share amount from the
+    /// stack, calls
     /// ERC-4626 convertToAssets, and pushes the resulting asset amount.
-    /// @param inputs the inputs to the extern: [vault address as Float, shares as Float].
+    /// @param inputs the inputs to the extern: [vault address as raw stack
+    /// bits, shares as Float].
     function run(OperandV2, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
-        Float vaultFloat;
+        uint256 rawVault;
         Float sharesFloat;
         assembly ("memory-safe") {
-            vaultFloat := mload(add(inputs, 0x20))
+            rawVault := mload(add(inputs, 0x20))
             sharesFloat := mload(add(inputs, 0x40))
         }
 
-        Float assetsFloat = LibERC4626.convertToAssets(vaultFloat, sharesFloat);
+        Float assetsFloat = LibERC4626.convertToAssets(rawVault, sharesFloat);
 
         StackItem[] memory outputs;
         assembly ("memory-safe") {
