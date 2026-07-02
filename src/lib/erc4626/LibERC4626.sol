@@ -60,10 +60,14 @@ library LibERC4626 {
     /// @notice Converts vault shares to underlying assets via ERC-4626 convertToAssets.
     /// The vault is identified by its address as raw stack bits.
     /// The shares amount is passed as a Rain Float with the vault's share decimals.
+    /// @dev ERC-4626 mandates that convertToAssets rounds DOWN (toward zero). The result
+    /// is therefore the floor of the true share-to-asset conversion, not an exact equivalent.
+    /// Callers must ensure that under-counting assets is safe for their use-site
+    /// (i.e. the non-interactive party is not shorted by the floor rounding).
     /// @param rawVault The vault address as raw stack bits (bits above the low
     /// 160 MUST be zero; enforced).
     /// @param sharesFloat The number of shares to convert, as a Rain Float.
-    /// @return The equivalent amount of underlying assets, as a Rain Float.
+    /// @return The floor-rounded amount of underlying assets, as a Rain Float.
     function convertToAssets(uint256 rawVault, Float sharesFloat) internal view returns (Float) {
         (IERC4626Minimal vault, uint8 shareDecimals, uint8 assetDecimals) = _decode(rawVault);
         uint256 sharesRaw = LibDecimalFloat.toFixedDecimalLossless(sharesFloat, shareDecimals);
@@ -74,10 +78,14 @@ library LibERC4626 {
     /// @notice Converts underlying assets to vault shares via ERC-4626 convertToShares.
     /// The vault is identified by its address as raw stack bits.
     /// The assets amount is passed as a Rain Float with the underlying asset's decimals.
+    /// @dev ERC-4626 mandates that convertToShares rounds DOWN (toward zero). The result
+    /// is therefore the floor of the true asset-to-share conversion, not an exact equivalent.
+    /// Callers must ensure that under-counting shares is safe for their use-site
+    /// (i.e. the non-interactive party is not shorted by the floor rounding).
     /// @param rawVault The vault address as raw stack bits (bits above the low
     /// 160 MUST be zero; enforced).
     /// @param assetsFloat The amount of underlying assets to convert, as a Rain Float.
-    /// @return The equivalent number of vault shares, as a Rain Float.
+    /// @return The floor-rounded number of vault shares, as a Rain Float.
     function convertToShares(uint256 rawVault, Float assetsFloat) internal view returns (Float) {
         (IERC4626Minimal vault, uint8 shareDecimals, uint8 assetDecimals) = _decode(rawVault);
         uint256 assetsRaw = LibDecimalFloat.toFixedDecimalLossless(assetsFloat, assetDecimals);
