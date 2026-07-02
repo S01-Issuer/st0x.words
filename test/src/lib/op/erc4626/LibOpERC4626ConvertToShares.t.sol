@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {stdError} from "forge-std-1.16.1/src/StdError.sol";
 import {LibOpERC4626ConvertToShares} from "src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
-import {InvalidVaultAddress} from "src/lib/erc4626/LibERC4626.sol";
+import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LossyConversionFromFloat} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
@@ -86,13 +86,13 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         assertTrue(StackItem.unwrap(outputs[0]) != bytes32(0), "output should be non-zero for non-zero input");
     }
 
-    function testRunRevertsOnInvalidVaultAddress() external {
+    function testRunRevertsOnNonAddressVault() external {
         StackItem[] memory inputs = new StackItem[](2);
-        // Any bit above the low 160 makes the raw vault value not an address.
-        uint256 rawVault = uint256(type(uint160).max) + 1;
-        inputs[0] = StackItem.wrap(bytes32(rawVault));
+        // Any bit above the low 160 makes the vault stack item not an address.
+        uint256 vaultWord = uint256(type(uint160).max) + 1;
+        inputs[0] = StackItem.wrap(bytes32(vaultWord));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
-        vm.expectRevert(abi.encodeWithSelector(InvalidVaultAddress.selector, rawVault));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, vaultWord));
         this._callRunShares(inputs);
     }
 

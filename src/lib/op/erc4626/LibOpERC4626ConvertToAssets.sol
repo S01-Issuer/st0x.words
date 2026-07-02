@@ -4,7 +4,8 @@ pragma solidity ^0.8.25;
 
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
-import {LibERC4626} from "../../erc4626/LibERC4626.sol";
+import {LibERC4626, IERC4626Minimal} from "../../erc4626/LibERC4626.sol";
+import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 
 library LibOpERC4626ConvertToAssets {
     /// Extern integrity for erc4626-convert-to-assets.
@@ -20,14 +21,23 @@ library LibOpERC4626ConvertToAssets {
     /// @param inputs the inputs to the extern: [vault address as raw stack
     /// bits, shares as Float].
     function run(OperandV2, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
-        uint256 rawVault;
+        uint256 vault;
         Float sharesFloat;
         assembly ("memory-safe") {
-            rawVault := mload(add(inputs, 0x20))
+            vault := mload(add(inputs, 0x20))
             sharesFloat := mload(add(inputs, 0x40))
         }
 
-        Float assetsFloat = LibERC4626.convertToAssets(rawVault, sharesFloat);
+        // It is the rainlang author's responsibility to ensure the correctness
+        // of vault as an address.
+        // Casting to `uint160` is intentional to detect non-address values.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        if (vault != uint256(uint160(vault))) revert NotAnAddress(vault);
+
+        // Casting to `uint160` is safe because `NotAnAddress` above
+        // ensures the value fits in 160 bits.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        Float assetsFloat = LibERC4626.convertToAssets(IERC4626Minimal(address(uint160(vault))), sharesFloat);
 
         StackItem[] memory outputs;
         assembly ("memory-safe") {

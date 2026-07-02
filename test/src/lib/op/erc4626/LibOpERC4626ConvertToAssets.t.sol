@@ -5,7 +5,7 @@ pragma solidity =0.8.25;
 import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {stdError} from "forge-std-1.16.1/src/StdError.sol";
 import {LibOpERC4626ConvertToAssets} from "src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
-import {InvalidVaultAddress} from "src/lib/erc4626/LibERC4626.sol";
+import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LossyConversionFromFloat} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
@@ -86,13 +86,28 @@ contract LibOpERC4626ConvertToAssetsTest is Test {
         assertTrue(StackItem.unwrap(outputs[0]) != bytes32(0), "output should be non-zero for non-zero input");
     }
 
-    function testRunRevertsOnInvalidVaultAddress() external {
+    /// @notice The guard accepts the entire address range: the maximum address
+    /// passes the round-trip check and is called, with its reads mocked.
+    function testRunAcceptsMaxAddressVault() external {
+        address maxAddr = address(type(uint160).max);
+        vm.mockCall(maxAddr, abi.encodeWithSignature("decimals()"), abi.encode(uint8(18)));
+        vm.mockCall(maxAddr, abi.encodeWithSignature("asset()"), abi.encode(address(asset)));
+        vm.mockCall(maxAddr, abi.encodeWithSignature("convertToAssets(uint256)"), abi.encode(uint256(1e18)));
         StackItem[] memory inputs = new StackItem[](2);
-        // Any bit above the low 160 makes the raw vault value not an address.
-        uint256 rawVault = uint256(type(uint160).max) + 1;
-        inputs[0] = StackItem.wrap(bytes32(rawVault));
+        inputs[0] = StackItem.wrap(bytes32(uint256(type(uint160).max)));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
-        vm.expectRevert(abi.encodeWithSelector(InvalidVaultAddress.selector, rawVault));
+        StackItem[] memory outputs = this._callRunAssets(inputs);
+        uint256 assetsRaw = LibDecimalFloat.toFixedDecimalLossless(Float.wrap(StackItem.unwrap(outputs[0])), 18);
+        assertEq(assetsRaw, 1e18, "max address vault must be called, not rejected");
+    }
+
+    function testRunRevertsOnNonAddressVault() external {
+        StackItem[] memory inputs = new StackItem[](2);
+        // Any bit above the low 160 makes the vault stack item not an address.
+        uint256 vaultWord = uint256(type(uint160).max) + 1;
+        inputs[0] = StackItem.wrap(bytes32(vaultWord));
+        inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, vaultWord));
         this._callRunAssets(inputs);
     }
 
