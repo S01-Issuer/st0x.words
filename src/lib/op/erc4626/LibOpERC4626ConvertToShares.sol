@@ -21,7 +21,7 @@ library LibOpERC4626ConvertToShares {
     /// @param inputs the inputs to the extern: [vault address as raw stack
     /// bits, assets as Float].
     function run(OperandV2, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
-        uint256 vault;
+        bytes32 vault;
         Float assetsFloat;
         assembly ("memory-safe") {
             vault := mload(add(inputs, 0x20))
@@ -32,12 +32,12 @@ library LibOpERC4626ConvertToShares {
         // of vault as an address.
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (vault != uint256(uint160(vault))) revert NotAnAddress(vault);
+        if (uint256(vault) != uint256(uint160(uint256(vault)))) revert NotAnAddress(uint256(vault));
 
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.
         //forge-lint: disable-next-line(unsafe-typecast)
-        Float sharesFloat = LibERC4626.convertToShares(IERC4626Minimal(address(uint160(vault))), assetsFloat);
+        Float sharesFloat = LibERC4626.convertToShares(IERC4626Minimal(address(uint160(uint256(vault)))), assetsFloat);
 
         StackItem[] memory outputs;
         assembly ("memory-safe") {
