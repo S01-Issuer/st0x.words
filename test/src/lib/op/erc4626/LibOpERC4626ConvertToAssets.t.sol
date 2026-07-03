@@ -4,12 +4,12 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {stdError} from "forge-std-1.16.1/src/StdError.sol";
-import {LibOpERC4626ConvertToAssets} from "src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
+import {LibOpERC4626ConvertToAssets} from "../../../../../src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
 import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LossyConversionFromFloat} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
-import {MockERC4626, MockERC20} from "test/utils/MockERC4626.sol";
+import {MockERC4626, MockERC20} from "../../../../utils/MockERC4626.sol";
 
 contract LibOpERC4626ConvertToAssetsTest is Test {
     MockERC20 internal asset;
