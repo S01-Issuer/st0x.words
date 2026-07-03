@@ -4,7 +4,8 @@ pragma solidity ^0.8.25;
 
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
-import {LibERC4626} from "../../erc4626/LibERC4626.sol";
+import {LibERC4626, IERC4626Minimal} from "../../erc4626/LibERC4626.sol";
+import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 
 library LibOpERC4626ConvertToShares {
     /// Extern integrity for erc4626-convert-to-shares.
@@ -14,18 +15,29 @@ library LibOpERC4626ConvertToShares {
     }
 
     /// Runs the erc4626-convert-to-shares operation.
-    /// Reads the vault address and asset amount from the stack, calls
+    /// Reads the vault address (raw stack bits) and asset amount from the
+    /// stack, calls
     /// ERC-4626 convertToShares, and pushes the resulting share amount.
-    /// @param inputs the inputs to the extern: [vault address as Float, assets as Float].
+    /// @param inputs the inputs to the extern: [vault address as raw stack
+    /// bits, assets as Float].
     function run(OperandV2, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
-        Float vaultFloat;
+        bytes32 vault;
         Float assetsFloat;
         assembly ("memory-safe") {
-            vaultFloat := mload(add(inputs, 0x20))
+            vault := mload(add(inputs, 0x20))
             assetsFloat := mload(add(inputs, 0x40))
         }
 
-        Float sharesFloat = LibERC4626.convertToShares(vaultFloat, assetsFloat);
+        // It is the rainlang author's responsibility to ensure the correctness
+        // of vault as an address.
+        // Casting to `uint160` is intentional to detect non-address values.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        if (uint256(vault) != uint256(uint160(uint256(vault)))) revert NotAnAddress(uint256(vault));
+
+        // Casting to `uint160` is safe because `NotAnAddress` above
+        // ensures the value fits in 160 bits.
+        //forge-lint: disable-next-line(unsafe-typecast)
+        Float sharesFloat = LibERC4626.convertToShares(IERC4626Minimal(address(uint160(uint256(vault)))), assetsFloat);
 
         StackItem[] memory outputs;
         assembly ("memory-safe") {
