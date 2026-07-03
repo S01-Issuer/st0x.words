@@ -65,11 +65,15 @@ nix develop github:rainlanguage/rainix#sol-shell -c forge soldeer install
 
 ### Build
 
+Requires soldeer dependencies to be installed first (see above).
+
 ```sh
 forge build
 ```
 
 ### Test
+
+Requires soldeer dependencies to be installed first (see above).
 
 ```sh
 forge test
@@ -119,6 +123,8 @@ inputs.
 | **Git is clean**         | push            | Reusable `rainix-copy-artifacts`: meta, pointers, format, fails if dirty |
 | **Manual sol artifacts** | manual dispatch | Deploys to `base` via `rainix-sol-artifacts` (only `base` is offered)    |
 
-Required secrets: `PRIVATE_KEY`, `PRIVATE_KEY_DEV`, `CI_DEPLOY_RPC_URL`,
-`EXPLORER_VERIFICATION_KEY`, `CI_DEPLOY_BASE_RPC_URL`,
-`CI_DEPLOY_BASE_ETHERSCAN_API_KEY`.
+Required secrets (for the Manual sol artifacts deploy workflow, network=base):
+`PRIVATE_KEY`, `CI_DEPLOY_BASE_RPC_URL`, `CI_DEPLOY_BASE_ETHERSCAN_API_KEY`,
+`CI_DEPLOY_BASE_VERIFY`, `CI_DEPLOY_BASE_VERIFIER`, `CI_DEPLOY_BASE_VERIFIER_URL`.
+For other networks substitute `BASE` with the network name in uppercase.
+The CI workflows also use `CACHIX_AUTH_TOKEN` (org-level, passed via `secrets: inherit`).
