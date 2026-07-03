@@ -21,3 +21,22 @@ address constant WT_QQQM = 0x823FF7Bbde2869aAe73A6CD53e7f614442836757;
 address constant WT_VWO = 0x23ec6886b49D7ab123E9ee8e474D2fa7AB6Cbc2d;
 address constant WT_ARKK = 0x9FfF48B4535AF3765Ac9E1b164720EDc01DF8EE7;
 address constant WT_SGOV = 0x78c31580c97101694C70022c83D570150c11e935;
+
+function allForkVaults() pure returns (address[] memory vaults_) {
+    vaults_ = new address[](15);
+    vaults_[0] = WT_NVDA;
+    vaults_[1] = WT_AMZN;
+    vaults_[2] = WT_TSLA;
+    vaults_[3] = WT_MSTR;
+    vaults_[4] = WT_IAU;
+    vaults_[5] = WT_COIN;
+    vaults_[6] = WT_SPYM;
+    vaults_[7] = WT_SIVR;
+    vaults_[8] = WT_CRCL;
+    vaults_[9] = WT_BMNR;
+    vaults_[10] = WT_PPLT;
+    vaults_[11] = WT_QQQM;
+    vaults_[12] = WT_VWO;
+    vaults_[13] = WT_ARKK;
+    vaults_[14] = WT_SGOV;
+}
