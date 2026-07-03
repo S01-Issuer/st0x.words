@@ -36,8 +36,7 @@ contract ERC4626WordsExternTest is Test {
     }
 
     function vaultItem() internal view returns (StackItem) {
-        // forge-lint: disable-next-line(unsafe-typecast)
-        return StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault)))), 0)));
+        return StackItem.wrap(bytes32(uint256(uint160(address(vault)))));
     }
 
     /// @dev Opcode 0 must route to convertToAssets: 1 share (Float 1.0) → 2 USDC (6 decimals).

@@ -188,9 +188,7 @@ contract LibOpERC4626ConvertToAssetsTest is Test {
     function testRunZeroRateVaultReturnsZero() external {
         MockERC4626 zeroRateVault = new MockERC4626(18, address(asset), 0);
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] = StackItem.wrap(
-            Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(zeroRateVault)))), 0))
-        );
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(zeroRateVault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         StackItem[] memory outputs = this.runExternal(inputs);

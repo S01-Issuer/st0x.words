@@ -151,9 +151,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         MockERC4626 vaultMixed = new MockERC4626(18, address(asset6), 1e6);
 
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] = StackItem.wrap(
-            Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vaultMixed)))), 0))
-        );
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vaultMixed)))));
         // 2.0 assets (represented as Float 2e0 — the library converts using assetDecimals=6)
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(2, 0)));
 
@@ -171,9 +169,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
     function testRunZeroSupplyVaultReverts() external {
         MockERC4626 emptyVault = new MockERC4626(18, address(asset), 0);
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] = StackItem.wrap(
-            Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(emptyVault)))), 0))
-        );
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(emptyVault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         vm.expectRevert(stdError.divisionError);
