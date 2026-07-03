@@ -4,12 +4,13 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {stdError} from "forge-std-1.16.1/src/StdError.sol";
-import {LibOpERC4626ConvertToShares} from "src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
+import {LibOpERC4626ConvertToShares} from "../../../../../src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
+import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LossyConversionFromFloat} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
-import {MockERC4626, MockERC20} from "test/utils/MockERC4626.sol";
-import {UnexpectedInputs} from "src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
+import {MockERC4626, MockERC20} from "../../../../utils/MockERC4626.sol";
+import {UnexpectedInputs} from "../../../../../src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
 
 contract LibOpERC4626ConvertToSharesTest is Test {
     MockERC20 internal asset;
@@ -32,9 +33,8 @@ contract LibOpERC4626ConvertToSharesTest is Test {
 
     function testRunOneToOne() external view {
         StackItem[] memory inputs = new StackItem[](2);
-        // vault address encoded as Float
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault)))), 0)));
+        // vault address as raw stack bits
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault)))));
         // 1.0 asset
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
@@ -48,8 +48,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
 
     function testRunTwoAssets() external view {
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault)))));
         // 2.0 assets
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(2, 0)));
 
@@ -66,8 +65,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         MockERC4626 vault2 = new MockERC4626(18, address(asset), 2e18);
 
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault2)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault2)))));
         // 2.0 assets
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(2, 0)));
 
@@ -81,8 +79,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
 
     function testRunOutputIsNonZeroForNonZeroInput() external view {
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         StackItem[] memory outputs = LibOpERC4626ConvertToShares.run(OperandV2.wrap(0), inputs);
@@ -104,12 +101,13 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         this._callRunShares(inputs);
     }
 
-    function testRunRevertsOnNonIntegerVaultFloat() external {
+    function testRunRevertsOnNonAddressVault() external {
         StackItem[] memory inputs = new StackItem[](2);
-        // vaultFloat = 0.5 — not representable as a uint160 address integer
-        inputs[0] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(5, -1)));
+        // Any bit above the low 160 makes the vault stack item not an address.
+        uint256 vaultWord = uint256(type(uint160).max) + 1;
+        inputs[0] = StackItem.wrap(bytes32(vaultWord));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
-        vm.expectRevert(abi.encodeWithSelector(LossyConversionFromFloat.selector, int256(5), int256(-1)));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, vaultWord));
         this._callRunShares(inputs);
     }
 
@@ -118,8 +116,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         MockERC20 asset0 = new MockERC20(0);
         MockERC4626 vault0 = new MockERC4626(0, address(asset0), 1);
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault0)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault0)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(5, -1)));
         vm.expectRevert(abi.encodeWithSelector(LossyConversionFromFloat.selector, int256(5), int256(-1)));
         this._callRunShares(inputs);
@@ -130,7 +127,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         MockERC4626 fv = new MockERC4626(18, address(asset), uint256(rate));
 
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(fv)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(fv)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(assetsWhole)), 0)));
 
         uint256 assetsRaw = uint256(assetsWhole) * 1e18;
@@ -153,8 +150,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
 
     function testRunZeroAssets() external view {
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(0, 0)));
 
         StackItem[] memory outputs = LibOpERC4626ConvertToShares.run(OperandV2.wrap(0), inputs);
@@ -170,9 +166,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         MockERC4626 vaultMixed = new MockERC4626(18, address(asset6), 1e6);
 
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] = StackItem.wrap(
-            Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vaultMixed)))), 0))
-        );
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vaultMixed)))));
         // 2.0 assets (represented as Float 2e0 — the library converts using assetDecimals=6)
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(2, 0)));
 
@@ -190,9 +184,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
     function testRunZeroSupplyVaultReverts() external {
         MockERC4626 emptyVault = new MockERC4626(18, address(asset), 0);
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] = StackItem.wrap(
-            Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(emptyVault)))), 0))
-        );
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(emptyVault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         vm.expectRevert(stdError.divisionError);
@@ -201,8 +193,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
 
     function testRunRevertsOnLossyAssetInput() external {
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault)))));
         // 1e-19 assets: finer than the asset's 18 decimals, cannot be converted losslessly to uint256
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, -19)));
         vm.expectRevert(abi.encodeWithSelector(LossyConversionFromFloat.selector, int256(1), int256(-19)));
@@ -213,8 +204,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         // 1 share = 3 assets → 1 asset = 0.333... shares; must round DOWN (favors protocol).
         MockERC4626 vault3 = new MockERC4626(18, address(asset), 3e18);
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault3)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault3)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         StackItem[] memory outputs = LibOpERC4626ConvertToShares.run(OperandV2.wrap(0), inputs);
@@ -229,8 +219,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         // assetsPerShare = 3e18; 1 asset rounds down to 333333333333333333 shares
         MockERC4626 vault3 = new MockERC4626(18, address(asset), 3e18);
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault3)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vault3)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         StackItem[] memory outputs = LibOpERC4626ConvertToShares.run(OperandV2.wrap(0), inputs);
