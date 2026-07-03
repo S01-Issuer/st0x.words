@@ -16,15 +16,20 @@ library LibOpERC4626ConvertToShares {
 
     /// Runs the erc4626-convert-to-shares operation.
     /// Reads the vault address (raw stack bits) and asset amount from the
-    /// stack, calls
-    /// ERC-4626 convertToShares, and pushes the resulting share amount.
+    /// stack, calls ERC-4626 convertToShares, and pushes the resulting share
+    /// amount. Rounding follows the vault's convertToShares: per EIP-4626
+    /// this rounds DOWN (toward zero), favouring the vault; the caller
+    /// receives fewer shares than the exact mathematical result.
     /// @dev The vault at the given address is entirely untrusted. It can return any value
     /// from convertToShares, including type(uint256).max; the only guard is that
     /// fromFixedDecimalLosslessPacked reverts if the result cannot be packed into a Float.
     /// Downstream Rainlang authors must not assume the returned Float is trustworthy.
-    /// @param inputs the inputs to the extern: [vault address as raw stack
-    /// bits, assets as Float].
-    function run(OperandV2, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
+    /// @param operand Unused operand for this extern word.
+    /// @param inputs [vault address as raw stack bits, assets as Float
+    /// interpreted at the underlying asset token's decimals].
+    /// @return outputs a single-element stack: [shares as Float at the vault's
+    /// share decimals, rounded down per the vault's convertToShares].
+    function run(OperandV2 operand, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
         bytes32 vault;
         Float assetsFloat;
         assembly ("memory-safe") {

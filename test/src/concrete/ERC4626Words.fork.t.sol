@@ -3,27 +3,9 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {
-    FORK_RPC_URL_BASE,
-    FORK_BLOCK_BASE,
-    WT_NVDA,
-    WT_AMZN,
-    WT_TSLA,
-    WT_MSTR,
-    WT_IAU,
-    WT_COIN,
-    WT_SPYM,
-    WT_SIVR,
-    WT_CRCL,
-    WT_BMNR,
-    WT_PPLT,
-    WT_QQQM,
-    WT_VWO,
-    WT_ARKK,
-    WT_SGOV
-} from "test/lib/LibFork.sol";
-import {LibOpERC4626ConvertToAssets} from "src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
-import {LibOpERC4626ConvertToShares} from "src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
+import {FORK_RPC_URL_BASE, FORK_BLOCK_BASE, allForkVaults} from "../../lib/LibFork.sol";
+import {LibOpERC4626ConvertToAssets} from "../../../src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
+import {LibOpERC4626ConvertToShares} from "../../../src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 
@@ -94,63 +76,14 @@ contract ERC4626WordsForkTest is Test {
         assertEq(actualShares, expectedShares, string.concat(label, ": assetsToShares mismatch"));
     }
 
-    function testNVDA() external view {
-        checkVault(WT_NVDA, "NVDA");
-    }
-
-    function testAMZN() external view {
-        checkVault(WT_AMZN, "AMZN");
-    }
-
-    function testTSLA() external view {
-        checkVault(WT_TSLA, "TSLA");
-    }
-
-    function testMSTR() external view {
-        checkVault(WT_MSTR, "MSTR");
-    }
-
-    function testIAU() external view {
-        checkVault(WT_IAU, "IAU");
-    }
-
-    function testCOIN() external view {
-        checkVault(WT_COIN, "COIN");
-    }
-
-    function testSPYM() external view {
-        checkVault(WT_SPYM, "SPYM");
-    }
-
-    function testSIVR() external view {
-        checkVault(WT_SIVR, "SIVR");
-    }
-
-    function testCRCL() external view {
-        checkVault(WT_CRCL, "CRCL");
-    }
-
-    function testBMNR() external view {
-        checkVault(WT_BMNR, "BMNR");
-    }
-
-    function testPPLT() external view {
-        checkVault(WT_PPLT, "PPLT");
-    }
-
-    function testQQQM() external view {
-        checkVault(WT_QQQM, "QQQM");
-    }
-
-    function testVWO() external view {
-        checkVault(WT_VWO, "VWO");
-    }
-
-    function testARKK() external view {
-        checkVault(WT_ARKK, "ARKK");
-    }
-
-    function testSGOV() external view {
-        checkVault(WT_SGOV, "SGOV");
+    /// @dev Iterates every vault in `allForkVaults()`, which sits directly beside the
+    ///      WT_* constants in LibFork.sol so adding a vault is a single adjacent edit.
+    ///      The array is still hand-maintained: a new WT_* constant is only tested once
+    ///      it is added to `allForkVaults()`.
+    function testAllForkVaults() external view {
+        address[] memory vaults_ = allForkVaults();
+        for (uint256 i; i < vaults_.length; i++) {
+            checkVault(vaults_[i], vm.toString(vaults_[i]));
+        }
     }
 }
