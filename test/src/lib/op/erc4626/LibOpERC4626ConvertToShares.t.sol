@@ -4,12 +4,12 @@ pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {stdError} from "forge-std-1.16.1/src/StdError.sol";
-import {LibOpERC4626ConvertToShares} from "src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
+import {LibOpERC4626ConvertToShares} from "../../../../../src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
 import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LossyConversionFromFloat} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
-import {MockERC4626, MockERC20} from "test/utils/MockERC4626.sol";
+import {MockERC4626, MockERC20} from "../../../../utils/MockERC4626.sol";
 
 contract LibOpERC4626ConvertToSharesTest is Test {
     MockERC20 internal asset;
@@ -151,9 +151,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
         MockERC4626 vaultMixed = new MockERC4626(18, address(asset6), 1e6);
 
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] = StackItem.wrap(
-            Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vaultMixed)))), 0))
-        );
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(vaultMixed)))));
         // 2.0 assets (represented as Float 2e0 — the library converts using assetDecimals=6)
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(2, 0)));
 
@@ -171,9 +169,7 @@ contract LibOpERC4626ConvertToSharesTest is Test {
     function testRunZeroSupplyVaultReverts() external {
         MockERC4626 emptyVault = new MockERC4626(18, address(asset), 0);
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] = StackItem.wrap(
-            Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(emptyVault)))), 0))
-        );
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(emptyVault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         vm.expectRevert(stdError.divisionError);
