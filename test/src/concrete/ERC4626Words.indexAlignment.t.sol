@@ -6,19 +6,19 @@ import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {
     OPCODE_ERC4626_CONVERT_TO_ASSETS,
     OPCODE_ERC4626_CONVERT_TO_SHARES,
-    OPCODE_FUNCTION_POINTERS_LENGTH
-} from "src/abstract/ERC4626Extern.sol";
+    ERC4626_WORD_COUNT
+} from "../../../src/abstract/ERC4626Extern.sol";
 import {
     SUB_PARSER_WORD_ERC4626_CONVERT_TO_ASSETS,
     SUB_PARSER_WORD_ERC4626_CONVERT_TO_SHARES,
     SUB_PARSER_WORD_PARSERS_LENGTH
-} from "src/lib/parse/LibERC4626SubParser.sol";
+} from "../../../src/lib/parse/LibERC4626SubParser.sol";
 import {
     OPCODE_FUNCTION_POINTERS,
     INTEGRITY_FUNCTION_POINTERS,
     SUB_PARSER_WORD_PARSERS,
     OPERAND_HANDLER_FUNCTION_POINTERS
-} from "src/generated/ERC4626Words.pointers.sol";
+} from "../../../src/generated/ERC4626Words.pointers.sol";
 
 /// @notice Asserts the five parallel opcode/word index constants all agree.
 /// Covers HIGH issue: word-name -> opcode-index binding is hand-replicated
@@ -42,9 +42,9 @@ contract ERC4626WordsIndexAlignmentTest is Test {
 
     function testOpcodeLengthMatchesSubParserWordLength() external pure {
         assertEq(
-            OPCODE_FUNCTION_POINTERS_LENGTH,
+            ERC4626_WORD_COUNT,
             SUB_PARSER_WORD_PARSERS_LENGTH,
-            "OPCODE_FUNCTION_POINTERS_LENGTH must equal SUB_PARSER_WORD_PARSERS_LENGTH"
+            "ERC4626_WORD_COUNT must equal SUB_PARSER_WORD_PARSERS_LENGTH"
         );
     }
 
@@ -58,7 +58,7 @@ contract ERC4626WordsIndexAlignmentTest is Test {
     function testOpcodeFunctionPointersByteLengthMatchesCount() external pure {
         assertEq(
             OPCODE_FUNCTION_POINTERS.length,
-            OPCODE_FUNCTION_POINTERS_LENGTH * 2,
+            ERC4626_WORD_COUNT * 2,
             "OPCODE_FUNCTION_POINTERS must be exactly 2 bytes per opcode"
         );
     }
@@ -66,7 +66,7 @@ contract ERC4626WordsIndexAlignmentTest is Test {
     function testIntegrityFunctionPointersByteLengthMatchesCount() external pure {
         assertEq(
             INTEGRITY_FUNCTION_POINTERS.length,
-            OPCODE_FUNCTION_POINTERS_LENGTH * 2,
+            ERC4626_WORD_COUNT * 2,
             "INTEGRITY_FUNCTION_POINTERS must be exactly 2 bytes per opcode"
         );
     }

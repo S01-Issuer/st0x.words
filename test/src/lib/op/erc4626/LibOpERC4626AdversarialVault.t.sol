@@ -3,13 +3,13 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {LibOpERC4626ConvertToAssets} from "src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
-import {LibOpERC4626ConvertToShares} from "src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
+import {LibOpERC4626ConvertToAssets} from "../../../../../src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
+import {LibOpERC4626ConvertToShares} from "../../../../../src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LossyConversionToFloat} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
-import {MockERC20} from "test/utils/MockERC20.sol";
-import {MaliciousERC4626} from "test/utils/MaliciousERC4626.sol";
+import {MockERC20} from "../../../../utils/MockERC20.sol";
+import {MaliciousERC4626} from "../../../../utils/MaliciousERC4626.sol";
 
 /// @notice Tests that an adversarial vault returning type(uint256).max causes a
 /// revert with LossyConversionToFloat rather than silent data corruption.
@@ -46,8 +46,7 @@ contract LibOpERC4626AdversarialVaultTest is Test {
     /// must revert with LossyConversionToFloat, not silently corrupt the result.
     function testAdversarialConvertToAssetsReverts() external {
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(malVault)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(malVault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         // type(uint256).max / 10 fits in int256; exponent shifts by +1 because the
@@ -62,8 +61,7 @@ contract LibOpERC4626AdversarialVaultTest is Test {
     /// must revert with LossyConversionToFloat, not silently corrupt the result.
     function testAdversarialConvertToSharesReverts() external {
         StackItem[] memory inputs = new StackItem[](2);
-        inputs[0] =
-            StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(malVault)))), 0)));
+        inputs[0] = StackItem.wrap(bytes32(uint256(uint160(address(malVault)))));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
         vm.expectRevert(
