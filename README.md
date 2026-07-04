@@ -112,18 +112,22 @@ DEPLOYMENT_KEY=<private-key> forge script script/Deploy.sol \
 ```
 
 Or trigger the **Manual sol artifacts** GitHub Actions workflow from the Actions
-tab, selecting the target network.
+tab. There is no network selection: the deploy script deterministically deploys
+via the Zoltu factory to every network it defines (currently `base`), skipping
+networks where the pinned address already has code, and emits the described-by
+meta to the MetaBoard.
 
 ## CI
 
-| Workflow                 | Trigger         | What it does                                                             |
-| ------------------------ | --------------- | ------------------------------------------------------------------------ |
-| **rainix-sol**           | push            | Reusable Rainix workflow: test, static analysis, REUSE (`rainix-sol`)    |
-| **Git is clean**         | push            | Reusable `rainix-copy-artifacts`: meta, pointers, format, fails if dirty |
-| **Manual sol artifacts** | manual dispatch | Deploys to chosen network via `rainix-sol-artifacts`                     |
+| Workflow                 | Trigger         | What it does                                                                          |
+| ------------------------ | --------------- | ------------------------------------------------------------------------------------- |
+| **rainix-sol**           | push            | Reusable Rainix workflow: test, static analysis, REUSE (`rainix-sol`)                 |
+| **Git is clean**         | push            | Reusable `rainix-copy-artifacts`: meta, pointers, format, fails if dirty              |
+| **Manual sol artifacts** | manual dispatch | Deterministic Zoltu deploy to script-defined networks (`rainix-manual-sol-artifacts`) |
 
 Required secrets (for the Manual sol artifacts deploy workflow, network=base):
 `PRIVATE_KEY`, `CI_DEPLOY_BASE_RPC_URL`, `CI_DEPLOY_BASE_ETHERSCAN_API_KEY`,
-`CI_DEPLOY_BASE_VERIFY`, `CI_DEPLOY_BASE_VERIFIER`, `CI_DEPLOY_BASE_VERIFIER_URL`.
-For other networks substitute `BASE` with the network name in uppercase.
-The CI workflows also use `CACHIX_AUTH_TOKEN` (org-level, passed via `secrets: inherit`).
+`CI_DEPLOY_BASE_VERIFY`, `CI_DEPLOY_BASE_VERIFIER`,
+`CI_DEPLOY_BASE_VERIFIER_URL`. For other networks substitute `BASE` with the
+network name in uppercase. The CI workflows also use `CACHIX_AUTH_TOKEN`
+(org-level, passed via `secrets: inherit`).

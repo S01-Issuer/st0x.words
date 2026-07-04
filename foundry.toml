@@ -17,7 +17,7 @@ bytecode_hash = "none"
 cbor_metadata = false
 
 [rpc_endpoints]
-base = "${FORK_RPC_URL_BASE:-https://base.gateway.tenderly.co}"
+base = "${BASE_RPC_URL}"
 
 [dependencies]
 forge-std = "1.16.1"
@@ -28,7 +28,7 @@ rainlang = "0.1.2"
 "rain-sol-codegen" = "0.1.0"
 "rain-math-float" = "0.1.1"
 "rain-lib-typecast" = "0.1.0"
-"rain-deploy" = "0.1.2"
+"rain-deploy" = "0.1.4"
 "rain-extrospection" = "0.1.0"
 "rain-intorastring" = "0.1.0"
 "rain-lib-hash" = "0.1.0"
