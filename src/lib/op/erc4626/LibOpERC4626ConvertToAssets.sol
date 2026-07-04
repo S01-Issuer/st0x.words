@@ -18,10 +18,9 @@ library LibOpERC4626ConvertToAssets {
     /// Reads the vault address (raw stack bits) and share amount from the
     /// stack, calls ERC-4626 convertToAssets, and pushes the resulting asset
     /// amount.
-    /// @dev The vault at the given address is entirely untrusted. It can return any value
-    /// from convertToAssets, including type(uint256).max; the only guard is that
-    /// fromFixedDecimalLosslessPacked reverts if the result cannot be packed into a Float.
-    /// Downstream Rainlang authors must not assume the returned Float is trustworthy.
+    /// @dev This word performs no validation of the vault or its returned
+    /// values beyond Float packing; the result carries whatever trust the
+    /// expression places in the vault it names.
     /// @param operand Unused operand for this extern word.
     /// @param inputs [vault address as raw stack bits, shares as Float
     /// interpreted at the vault's share decimals].
