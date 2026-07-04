@@ -16,18 +16,16 @@ address constant METABOARD_ADDRESS = 0xfb8437AeFBB8031064E274527C5fc08e30Ac6928;
 
 /// @title Deploy
 /// Deploys `ERC4626Words` deterministically via the Zoltu factory to every
-/// network listed in `networks()` and emits its described-by meta to the
+/// rain supported network and emits its described-by meta to the
 /// MetaBoard in the same broadcast. There are no deploy-time choices: one
 /// dispatch covers all networks, the address is precommitted in the generated
 /// pointers, and an already-deployed network is skipped idempotently (the meta
 /// was emitted when it deployed).
 contract Deploy is Script {
-    /// The networks this contract deploys to. Extend the list to add a
-    /// network; deployment is deterministic so the address is identical
-    /// everywhere.
+    /// The networks this contract deploys to: every rain supported network.
+    /// Deployment is deterministic so the address is identical everywhere.
     function networks() internal pure returns (string[] memory nets) {
-        nets = new string[](1);
-        nets[0] = LibRainDeploy.BASE;
+        nets = LibRainDeploy.supportedNetworks();
     }
 
     function run() external {

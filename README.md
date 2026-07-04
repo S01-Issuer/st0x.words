@@ -113,9 +113,9 @@ DEPLOYMENT_KEY=<private-key> forge script script/Deploy.sol \
 
 Or trigger the **Manual sol artifacts** GitHub Actions workflow from the Actions
 tab. There is no network selection: the deploy script deterministically deploys
-via the Zoltu factory to every network it defines (currently `base`), skipping
-networks where the pinned address already has code, and emits the described-by
-meta to the MetaBoard.
+via the Zoltu factory to every rain supported network (arbitrum, base,
+base_sepolia, flare, polygon), skipping networks where the pinned address
+already has code, and emits the described-by meta to the MetaBoard.
 
 ## CI
 
