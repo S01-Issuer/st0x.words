@@ -7,13 +7,13 @@ import {ERC4626Words} from "src/concrete/ERC4626Words.sol";
 import {OPCODE_ERC4626_CONVERT_TO_ASSETS, OPCODE_ERC4626_CONVERT_TO_SHARES} from "src/abstract/ERC4626Extern.sol";
 import {ExternDispatchV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterExternV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
+import {LossyConversionFromFloat} from "rain-math-float-0.1.1/src/error/ErrDecimalFloat.sol";
 import {MockERC4626} from "test/utils/MockERC4626.sol";
 import {MockERC20} from "test/utils/MockERC20.sol";
 
-/// @notice Fuzz tests asserting that sub-decimal inputs never revert.
-/// A vault with 18-decimal shares and a 6-decimal asset at a non-unity rate
-/// produces fractional raw amounts when given arbitrary Float inputs.
-/// The words must truncate (floor) rather than revert.
+/// @notice Fuzz tests asserting that sub-decimal inputs revert with LossyConversionFromFloat.
+/// A vault with 18-decimal shares and a 6-decimal asset; Float inputs with more decimal
+/// places than the token precision cannot be converted losslessly and must revert.
 contract ERC4626WordsRoundingTest is Test {
     ERC4626Words internal words;
     MockERC20 internal asset;
@@ -34,32 +34,36 @@ contract ERC4626WordsRoundingTest is Test {
 
     function vaultItem() internal view returns (StackItem) {
         // forge-lint: disable-next-line(unsafe-typecast)
-        return StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(int256(uint256(uint160(address(vault)))), 0)));
+        return StackItem.wrap(bytes32(uint256(uint160(address(vault)))));
     }
 
     /// @notice An asset amount with 7 decimal places passed to convertToShares must
-    /// not revert even though the vault only has 6-decimal precision. The 7th decimal
-    /// digit is truncated (floor) before forwarding to the vault.
-    function testFuzzConvertToSharesSubDecimalNeverReverts(int56 significand) external view {
+    /// revert with LossyConversionFromFloat because the vault only has 6-decimal precision.
+    function testFuzzConvertToSharesSubDecimalReverts(int56 significand) external {
         vm.assume(significand > 0);
-        // 7 decimal places, but asset only has 6 — would revert with the old lossless conversion.
+        // Significand must not be divisible by 10: otherwise significand*10^(-7+6) = significand/10
+        // would be an integer and the conversion would succeed rather than revert.
+        vm.assume(significand % 10 != 0);
         Float assetsFloat = LibDecimalFloat.packLossless(int256(significand), -7);
         StackItem[] memory inputs = new StackItem[](2);
         inputs[0] = vaultItem();
         inputs[1] = StackItem.wrap(Float.unwrap(assetsFloat));
+        vm.expectRevert(abi.encodeWithSelector(LossyConversionFromFloat.selector, int256(significand), int256(-7)));
         words.extern(makeDispatch(OPCODE_ERC4626_CONVERT_TO_SHARES), inputs);
     }
 
     /// @notice A share amount with 19 decimal places passed to convertToAssets must
-    /// not revert even though the vault only has 18-decimal precision. The excess digit
-    /// is truncated (floor) before forwarding to the vault.
-    function testFuzzConvertToAssetsSubDecimalNeverReverts(int56 significand) external view {
+    /// revert with LossyConversionFromFloat because the vault only has 18-decimal precision.
+    function testFuzzConvertToAssetsSubDecimalReverts(int56 significand) external {
         vm.assume(significand > 0);
-        // 19 decimal places, but shares have 18 — would revert with the old lossless conversion.
+        // Significand must not be divisible by 10: otherwise significand*10^(-19+18) = significand/10
+        // would be an integer and the conversion would succeed rather than revert.
+        vm.assume(significand % 10 != 0);
         Float sharesFloat = LibDecimalFloat.packLossless(int256(significand), -19);
         StackItem[] memory inputs = new StackItem[](2);
         inputs[0] = vaultItem();
         inputs[1] = StackItem.wrap(Float.unwrap(sharesFloat));
+        vm.expectRevert(abi.encodeWithSelector(LossyConversionFromFloat.selector, int256(significand), int256(-19)));
         words.extern(makeDispatch(OPCODE_ERC4626_CONVERT_TO_ASSETS), inputs);
     }
 }
