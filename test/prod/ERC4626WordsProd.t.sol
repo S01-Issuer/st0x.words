@@ -3,7 +3,7 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {DEPLOYED_ADDRESS, BYTECODE_HASH} from "../../src/generated/ERC4626Words.pointers.sol";
+import {LibERC4626WordsDeploy} from "../../src/lib/deploy/LibERC4626WordsDeploy.sol";
 
 /// @notice Pins the production deployment: the pinned deterministic address on
 /// every rain supported network must hold exactly the pinned bytecode. Red
@@ -13,8 +13,8 @@ contract ERC4626WordsProdTest is Test {
     function checkProdDeploy(string memory network) internal {
         vm.createSelectFork(network);
         assertEq(
-            DEPLOYED_ADDRESS.codehash,
-            BYTECODE_HASH,
+            LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS.codehash,
+            LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_CODEHASH,
             string.concat("ERC4626Words not deployed on ", network, " at the pinned address")
         );
     }

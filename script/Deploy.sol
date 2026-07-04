@@ -7,7 +7,7 @@ import {ERC4626Words} from "../src/concrete/ERC4626Words.sol";
 import {IMetaBoardV1_2} from "rain-metadata-0.1.0/src/interface/unstable/IMetaBoardV1_2.sol";
 import {LibDescribedByMeta} from "rain-metadata-0.1.0/src/lib/LibDescribedByMeta.sol";
 import {LibRainDeploy} from "rain-deploy-0.1.4/src/lib/LibRainDeploy.sol";
-import {DEPLOYED_ADDRESS, BYTECODE_HASH} from "../src/generated/ERC4626Words.pointers.sol";
+import {LibERC4626WordsDeploy} from "../src/lib/deploy/LibERC4626WordsDeploy.sol";
 
 /// @dev Deterministic MetaBoard address deployed via Zoltu factory, identical
 /// on every supported network.
@@ -40,7 +40,7 @@ contract Deploy is Script {
             uint256 forkId = vm.createSelectFork(nets[i]);
             (forkId);
 
-            if (DEPLOYED_ADDRESS.code.length == 0) {
+            if (LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS.code.length == 0) {
                 if (LibRainDeploy.ZOLTU_FACTORY.code.length == 0) {
                     revert LibRainDeploy.MissingDependency(nets[i], LibRainDeploy.ZOLTU_FACTORY);
                 }
@@ -58,8 +58,10 @@ contract Deploy is Script {
 
                 vm.startBroadcast(deployer);
                 address deployed = LibRainDeploy.deployZoltu(type(ERC4626Words).creationCode);
-                if (deployed != DEPLOYED_ADDRESS) {
-                    revert LibRainDeploy.UnexpectedDeployedAddress(DEPLOYED_ADDRESS, deployed);
+                if (deployed != LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS) {
+                    revert LibRainDeploy.UnexpectedDeployedAddress(
+                        LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS, deployed
+                    );
                 }
                 LibDescribedByMeta.emitForDescribedAddress(
                     IMetaBoardV1_2(METABOARD_ADDRESS), ERC4626Words(deployed), subParserDescribedByMeta
@@ -67,8 +69,14 @@ contract Deploy is Script {
                 vm.stopBroadcast();
             }
 
-            if (DEPLOYED_ADDRESS.codehash != BYTECODE_HASH) {
-                revert LibRainDeploy.UnexpectedDeployedCodeHash(BYTECODE_HASH, DEPLOYED_ADDRESS.codehash);
+            if (
+                LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS.codehash
+                    != LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_CODEHASH
+            ) {
+                revert LibRainDeploy.UnexpectedDeployedCodeHash(
+                    LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_CODEHASH,
+                    LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS.codehash
+                );
             }
         }
     }
