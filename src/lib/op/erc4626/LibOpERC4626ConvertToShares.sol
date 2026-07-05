@@ -20,8 +20,10 @@ library LibOpERC4626ConvertToShares {
     /// amount. Rounding follows the vault's convertToShares: per EIP-4626
     /// this rounds DOWN (toward zero), favouring the vault; the caller
     /// receives fewer shares than the exact mathematical result.
-    /// @dev The result is floor-rounded (toward zero) per EIP-4626; precision
-    /// loss favours the party receiving the shares. See LibERC4626.convertToShares.
+    /// @dev See LibERC4626.convertToShares for the full rounding analysis.
+    /// @dev This word performs no validation of the vault or its returned
+    /// values beyond Float packing; the result carries whatever trust the
+    /// expression places in the vault it names.
     /// @param operand Unused operand for this extern word.
     /// @param inputs [vault address as raw stack bits, assets as Float
     /// interpreted at the underlying asset token's decimals].

@@ -38,15 +38,17 @@ library LibERC4626 {
 
     /// @notice Converts vault shares to underlying assets via ERC-4626 convertToAssets.
     /// The shares amount is passed as a Rain Float with the vault's share decimals.
-    ///
-    /// @dev ROUNDING: Per EIP-4626, convertToAssets MUST round DOWN (floor toward
-    /// zero). Precision loss of up to 1 ulp per call favours the caller
-    /// (order owner / share-holder): fewer assets are returned than the exact
-    /// mathematical result, so any Rain order using this word to price its output
-    /// pays out less than the ideal rate — the caller benefits, not the taker.
+    /// @dev ERC-4626 mandates that convertToAssets rounds DOWN (toward zero). The result
+    /// is therefore the floor of the true share-to-asset conversion, not an exact equivalent.
+    /// Precision loss of up to 1 ulp per call favours the caller (order owner /
+    /// share-holder): fewer assets are returned than the exact mathematical result,
+    /// so any Rain order using this word to price its output pays out less than the
+    /// ideal rate. Callers must ensure that under-counting assets is safe for their
+    /// use-site (i.e. the non-interactive party is not shorted by the floor rounding).
     /// An adversarial vault can engineer its exchange rate so that the truncated
     /// remainder is maximal on every call.
-    ///
+    /// @dev Reverts if `sharesFloat` cannot be losslessly represented at the vault's share
+    /// decimal precision (e.g. a Float encoding 1e-19 with an 18-decimal vault).
     /// @param vault The ERC-4626 vault contract.
     /// @param sharesFloat The number of shares to convert, as a Rain Float.
     /// @return The equivalent amount of underlying assets, as a Rain Float,
@@ -60,15 +62,17 @@ library LibERC4626 {
 
     /// @notice Converts underlying assets to vault shares via ERC-4626 convertToShares.
     /// The assets amount is passed as a Rain Float with the underlying asset's decimals.
-    ///
-    /// @dev ROUNDING: Per EIP-4626, convertToShares MUST round DOWN (floor toward
-    /// zero). Precision loss of up to 1 ulp per call favours the caller
-    /// (order owner / share-holder): fewer shares are returned than the exact
-    /// mathematical result, so any Rain order using this word to price its output
-    /// pays out less than the ideal rate — the caller benefits, not the taker.
+    /// @dev ERC-4626 mandates that convertToShares rounds DOWN (toward zero). The result
+    /// is therefore the floor of the true asset-to-share conversion, not an exact equivalent.
+    /// Precision loss of up to 1 ulp per call favours the caller (order owner /
+    /// share-holder): fewer shares are returned than the exact mathematical result,
+    /// so any Rain order using this word to price its output pays out less than the
+    /// ideal rate. Callers must ensure that under-counting shares is safe for their
+    /// use-site (i.e. the non-interactive party is not shorted by the floor rounding).
     /// An adversarial vault can engineer its exchange rate so that the truncated
     /// remainder is maximal on every call.
-    ///
+    /// @dev Reverts if `assetsFloat` cannot be losslessly represented at the underlying
+    /// asset's decimal precision (e.g. a Float encoding 1e-7 with a 6-decimal asset).
     /// @param vault The ERC-4626 vault contract.
     /// @param assetsFloat The amount of underlying assets to convert, as a Rain Float.
     /// @return The equivalent number of vault shares, as a Rain Float,

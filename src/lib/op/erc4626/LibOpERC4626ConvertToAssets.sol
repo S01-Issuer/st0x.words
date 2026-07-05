@@ -18,8 +18,11 @@ library LibOpERC4626ConvertToAssets {
     /// Reads the vault address (raw stack bits) and share amount from the
     /// stack, calls ERC-4626 convertToAssets, and pushes the resulting asset
     /// amount.
-    /// @dev The result is floor-rounded (toward zero) per EIP-4626; precision
-    /// loss favours the party receiving the assets. See LibERC4626.convertToAssets.
+    /// @dev The result is floor-rounded (toward zero) per EIP-4626; see
+    /// LibERC4626.convertToAssets for the full rounding analysis.
+    /// @dev This word performs no validation of the vault or its returned
+    /// values beyond Float packing; the result carries whatever trust the
+    /// expression places in the vault it names.
     /// @param operand Unused operand for this extern word.
     /// @param inputs [vault address as raw stack bits, shares as Float
     /// interpreted at the vault's share decimals].
