@@ -21,44 +21,54 @@ interface IERC20MetadataMinimal {
 
 /// @title LibERC4626
 /// @notice Core library for interacting with ERC-4626 tokenised vaults on-chain.
-/// Handles conversion between the float representation used by the Rain interpreter
-/// and the fixed-point uint256 values expected by ERC-4626 contracts.
+/// Takes the vault as a typed contract reference and handles conversion of the
+/// AMOUNTS between the float representation used by the Rain interpreter and
+/// the fixed-point uint256 values expected by ERC-4626 contracts.
 library LibERC4626 {
+    /// Reads the share and underlying-asset decimal scales from the vault:
+    /// vault.decimals() then vault.asset() then assetToken.decimals(), giving
+    /// both conversion functions a single, symmetric read path.
+    /// @param vault The ERC-4626 vault contract.
+    /// @return shareDecimals The decimal precision of the vault share token.
+    /// @return assetDecimals The decimal precision of the underlying asset token.
+    function _vaultScales(IERC4626Minimal vault) private view returns (uint8 shareDecimals, uint8 assetDecimals) {
+        shareDecimals = vault.decimals();
+        assetDecimals = IERC20MetadataMinimal(vault.asset()).decimals();
+    }
+
     /// @notice Converts vault shares to underlying assets via ERC-4626 convertToAssets.
-    /// The vault address is passed as a Float encoding of the address integer.
     /// The shares amount is passed as a Rain Float with the vault's share decimals.
-    /// @param vaultFloat Float encoding of the ERC-4626 vault contract address.
+    /// @dev ERC-4626 mandates that convertToAssets rounds DOWN (toward zero). The result
+    /// is therefore the floor of the true share-to-asset conversion, not an exact equivalent.
+    /// Callers must ensure that under-counting assets is safe for their use-site
+    /// (i.e. the non-interactive party is not shorted by the floor rounding).
+    /// @dev Reverts if `sharesFloat` cannot be losslessly represented at the vault's share
+    /// decimal precision (e.g. a Float encoding 1e-19 with an 18-decimal vault).
+    /// @param vault The ERC-4626 vault contract.
     /// @param sharesFloat The number of shares to convert, as a Rain Float.
     /// @return The equivalent amount of underlying assets, as a Rain Float.
-    function convertToAssets(Float vaultFloat, Float sharesFloat) internal view returns (Float) {
-        address vault = address(uint160(LibDecimalFloat.toFixedDecimalLossless(vaultFloat, 0)));
-
-        uint8 shareDecimals = IERC4626Minimal(vault).decimals();
-        address assetToken = IERC4626Minimal(vault).asset();
-        uint8 assetDecimals = IERC20MetadataMinimal(assetToken).decimals();
-
+    function convertToAssets(IERC4626Minimal vault, Float sharesFloat) internal view returns (Float) {
+        (uint8 shareDecimals, uint8 assetDecimals) = _vaultScales(vault);
         uint256 sharesRaw = LibDecimalFloat.toFixedDecimalLossless(sharesFloat, shareDecimals);
-        uint256 assetsRaw = IERC4626Minimal(vault).convertToAssets(sharesRaw);
-
+        uint256 assetsRaw = vault.convertToAssets(sharesRaw);
         return LibDecimalFloat.fromFixedDecimalLosslessPacked(assetsRaw, assetDecimals);
     }
 
     /// @notice Converts underlying assets to vault shares via ERC-4626 convertToShares.
-    /// The vault address is passed as a Float encoding of the address integer.
     /// The assets amount is passed as a Rain Float with the underlying asset's decimals.
-    /// @param vaultFloat Float encoding of the ERC-4626 vault contract address.
+    /// @dev ERC-4626 mandates that convertToShares rounds DOWN (toward zero). The result
+    /// is therefore the floor of the true asset-to-share conversion, not an exact equivalent.
+    /// Callers must ensure that under-counting shares is safe for their use-site
+    /// (i.e. the non-interactive party is not shorted by the floor rounding).
+    /// @dev Reverts if `assetsFloat` cannot be losslessly represented at the underlying
+    /// asset's decimal precision (e.g. a Float encoding 1e-7 with a 6-decimal asset).
+    /// @param vault The ERC-4626 vault contract.
     /// @param assetsFloat The amount of underlying assets to convert, as a Rain Float.
     /// @return The equivalent number of vault shares, as a Rain Float.
-    function convertToShares(Float vaultFloat, Float assetsFloat) internal view returns (Float) {
-        address vault = address(uint160(LibDecimalFloat.toFixedDecimalLossless(vaultFloat, 0)));
-
-        address assetToken = IERC4626Minimal(vault).asset();
-        uint8 assetDecimals = IERC20MetadataMinimal(assetToken).decimals();
-        uint8 shareDecimals = IERC4626Minimal(vault).decimals();
-
+    function convertToShares(IERC4626Minimal vault, Float assetsFloat) internal view returns (Float) {
+        (uint8 shareDecimals, uint8 assetDecimals) = _vaultScales(vault);
         uint256 assetsRaw = LibDecimalFloat.toFixedDecimalLossless(assetsFloat, assetDecimals);
-        uint256 sharesRaw = IERC4626Minimal(vault).convertToShares(assetsRaw);
-
+        uint256 sharesRaw = vault.convertToShares(assetsRaw);
         return LibDecimalFloat.fromFixedDecimalLosslessPacked(sharesRaw, shareDecimals);
     }
 }
