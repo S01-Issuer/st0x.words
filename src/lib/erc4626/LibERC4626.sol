@@ -42,6 +42,8 @@ library LibERC4626 {
     /// is therefore the floor of the true share-to-asset conversion, not an exact equivalent.
     /// Callers must ensure that under-counting assets is safe for their use-site
     /// (i.e. the non-interactive party is not shorted by the floor rounding).
+    /// @dev Reverts if `sharesFloat` cannot be losslessly represented at the vault's share
+    /// decimal precision (e.g. a Float encoding 1e-19 with an 18-decimal vault).
     /// @param vault The ERC-4626 vault contract.
     /// @param sharesFloat The number of shares to convert, as a Rain Float.
     /// @return The equivalent amount of underlying assets, as a Rain Float.
@@ -58,6 +60,8 @@ library LibERC4626 {
     /// is therefore the floor of the true asset-to-share conversion, not an exact equivalent.
     /// Callers must ensure that under-counting shares is safe for their use-site
     /// (i.e. the non-interactive party is not shorted by the floor rounding).
+    /// @dev Reverts if `assetsFloat` cannot be losslessly represented at the underlying
+    /// asset's decimal precision (e.g. a Float encoding 1e-7 with a 6-decimal asset).
     /// @param vault The ERC-4626 vault contract.
     /// @param assetsFloat The amount of underlying assets to convert, as a Rain Float.
     /// @return The equivalent number of vault shares, as a Rain Float.
