@@ -5,7 +5,7 @@ pragma solidity ^0.8.25;
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
 import {Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LibERC4626, IERC4626Minimal} from "../../erc4626/LibERC4626.sol";
-import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
+import {NotAnAddress} from "rainlang-0.1.8/src/error/ErrRainType.sol";
 
 library LibOpERC4626ConvertToShares {
     /// Extern integrity for erc4626-convert-to-shares.
@@ -40,7 +40,7 @@ library LibOpERC4626ConvertToShares {
         // of vault as an address.
         // Casting to `uint160` is intentional to detect non-address values.
         //forge-lint: disable-next-line(unsafe-typecast)
-        if (uint256(vault) != uint256(uint160(uint256(vault)))) revert NotAnAddress(uint256(vault));
+        if (uint256(vault) != uint256(uint160(uint256(vault)))) revert NotAnAddress(vault);
 
         // Casting to `uint160` is safe because `NotAnAddress` above
         // ensures the value fits in 160 bits.

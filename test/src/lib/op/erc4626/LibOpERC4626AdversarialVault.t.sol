@@ -11,7 +11,7 @@ import {LossyConversionToFloat, FixedDecimalOverflow} from "rain-math-float-0.1.
 import {MockERC20} from "../../../../utils/MockERC20.sol";
 import {MaliciousERC4626} from "../../../../utils/MaliciousERC4626.sol";
 import {MockERC4626} from "../../../../utils/MockERC4626.sol";
-import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
+import {NotAnAddress} from "rainlang-0.1.8/src/error/ErrRainType.sol";
 
 /// @notice Tests that an adversarial vault returning type(uint256).max causes a
 /// revert with LossyConversionToFloat rather than silent data corruption.
@@ -110,7 +110,7 @@ contract LibOpERC4626AdversarialVaultTest is Test {
         inputs[0] = StackItem.wrap(bytes32(oversized));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, oversized));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(oversized)));
         this.runConvertToAssets(inputs);
     }
 
@@ -121,7 +121,7 @@ contract LibOpERC4626AdversarialVaultTest is Test {
         inputs[0] = StackItem.wrap(bytes32(oversized));
         inputs[1] = StackItem.wrap(Float.unwrap(LibDecimalFloat.packLossless(1, 0)));
 
-        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, oversized));
+        vm.expectRevert(abi.encodeWithSelector(NotAnAddress.selector, bytes32(oversized)));
         this.runConvertToShares(inputs);
     }
 

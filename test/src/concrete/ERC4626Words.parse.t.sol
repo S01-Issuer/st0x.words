@@ -4,7 +4,7 @@ pragma solidity =0.8.25;
 
 import {
     RainlangExpressionDeployerDeploymentTest
-} from "rainlang-0.1.2/test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
+} from "rainlang-0.1.8/test/abstract/RainlangExpressionDeployerDeploymentTest.sol";
 import {
     EvalV4,
     SourceIndexV2,
