@@ -3,10 +3,11 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {LibERC4626, IERC4626Minimal} from "../../../../src/lib/erc4626/LibERC4626.sol";
+import {LibERC4626, IERC4626Minimal, UnsupportedDecimals} from "../../../../src/lib/erc4626/LibERC4626.sol";
 import {LibDecimalFloat, Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {MockERC4626} from "../../../utils/MockERC4626.sol";
 import {MockERC20} from "../../../utils/MockERC20.sol";
+import {MaliciousERC4626} from "../../../utils/MaliciousERC4626.sol";
 
 contract LibERC4626Test is Test {
     MockERC20 internal asset;
@@ -225,6 +226,48 @@ contract LibERC4626Test is Test {
         Float zeroAssets = LibDecimalFloat.packLossless(0, 0);
         Float sharesFloat = LibERC4626.convertToShares(typedVault, zeroAssets);
         assertEq(LibDecimalFloat.toFixedDecimalLossless(sharesFloat, 18), 0, "0 assets must yield 0 shares");
+    }
+
+    /// A vault reporting decimals() > MAX_DECIMALS must revert UnsupportedDecimals
+    /// for convertToAssets. Mutation: remove the shareDecimals guard → expectRevert fails.
+    function testShareDecimalsAboveMaxRevertsConvertToAssets() external {
+        MaliciousERC4626 malVault = new MaliciousERC4626(255, address(asset));
+        Float sharesFloat = LibDecimalFloat.packLossless(1, 0);
+
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedDecimals.selector, address(malVault), uint8(255)));
+        this._convertToAssets(IERC4626Minimal(address(malVault)), sharesFloat);
+    }
+
+    /// A vault reporting decimals() > MAX_DECIMALS must revert UnsupportedDecimals
+    /// for convertToShares. Mutation: remove the shareDecimals guard → expectRevert fails.
+    function testShareDecimalsAboveMaxRevertsConvertToShares() external {
+        MaliciousERC4626 malVault = new MaliciousERC4626(255, address(asset));
+        Float assetsFloat = LibDecimalFloat.packLossless(1, 0);
+
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedDecimals.selector, address(malVault), uint8(255)));
+        this._convertToShares(IERC4626Minimal(address(malVault)), assetsFloat);
+    }
+
+    /// An asset reporting decimals() > MAX_DECIMALS must revert UnsupportedDecimals
+    /// for convertToAssets. Mutation: remove the assetDecimals guard → expectRevert fails.
+    function testAssetDecimalsAboveMaxRevertsConvertToAssets() external {
+        MockERC20 malAsset = new MockERC20(255);
+        MockERC4626 normalVault = new MockERC4626(18, address(malAsset), 1e18);
+        Float sharesFloat = LibDecimalFloat.packLossless(1, 0);
+
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedDecimals.selector, address(malAsset), uint8(255)));
+        this._convertToAssets(IERC4626Minimal(address(normalVault)), sharesFloat);
+    }
+
+    /// An asset reporting decimals() > MAX_DECIMALS must revert UnsupportedDecimals
+    /// for convertToShares. Mutation: remove the assetDecimals guard → expectRevert fails.
+    function testAssetDecimalsAboveMaxRevertsConvertToShares() external {
+        MockERC20 malAsset = new MockERC20(255);
+        MockERC4626 normalVault = new MockERC4626(18, address(malAsset), 1e18);
+        Float assetsFloat = LibDecimalFloat.packLossless(1, 0);
+
+        vm.expectRevert(abi.encodeWithSelector(UnsupportedDecimals.selector, address(malAsset), uint8(255)));
+        this._convertToShares(IERC4626Minimal(address(normalVault)), assetsFloat);
     }
 
     function testConvertToAssetsLargeInput() external view {
