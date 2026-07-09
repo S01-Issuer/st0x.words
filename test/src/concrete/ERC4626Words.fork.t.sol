@@ -3,27 +3,7 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {
-    FORK_RPC_URL_BASE,
-    FORK_BLOCK_BASE,
-    FORK_VAULT_COUNT,
-    allForkVaults,
-    WT_NVDA,
-    WT_AMZN,
-    WT_TSLA,
-    WT_MSTR,
-    WT_IAU,
-    WT_COIN,
-    WT_SPYM,
-    WT_SIVR,
-    WT_CRCL,
-    WT_BMNR,
-    WT_PPLT,
-    WT_QQQM,
-    WT_VWO,
-    WT_ARKK,
-    WT_SGOV
-} from "../../lib/LibFork.sol";
+import {FORK_RPC_URL_BASE, FORK_BLOCK_BASE, allForkVaults} from "../../lib/LibFork.sol";
 import {LibOpERC4626ConvertToAssets} from "../../../src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
 import {LibOpERC4626ConvertToShares} from "../../../src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
 import {OperandV2, StackItem} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
@@ -96,57 +76,14 @@ contract ERC4626WordsForkTest is Test {
         assertEq(actualShares, expectedShares, string.concat(label, ": assetsToShares mismatch"));
     }
 
-    /// @dev Iterates every vault in `allForkVaults()`, which sits directly beside the
-    ///      WT_* constants in LibFork.sol so adding a vault is a single adjacent edit.
-    ///      The array is still hand-maintained: a new WT_* constant is only tested once
-    ///      it is added to `allForkVaults()`.
+    /// @dev Iterates every vault in `allForkVaults()`, the single registry of
+    ///      fork-tested vault addresses: the count is the registry's `.length`
+    ///      and labels derive from the addresses themselves, so every registry
+    ///      entry is checked with no parallel list to keep in sync.
     function testAllForkVaults() external view {
         address[] memory vaults_ = allForkVaults();
         for (uint256 i; i < vaults_.length; i++) {
             checkVault(vaults_[i], vm.toString(vaults_[i]));
-        }
-    }
-
-    /// @dev Assert the vault table covers every WT_* constant in LibFork.
-    /// Adding a new WT_* address without bumping FORK_VAULT_COUNT fails this test,
-    /// so a new address cannot ship without a corresponding checkVault call.
-    function testForkVaultEnumeration() external view {
-        address[FORK_VAULT_COUNT] memory vaults = [
-            WT_NVDA,
-            WT_AMZN,
-            WT_TSLA,
-            WT_MSTR,
-            WT_IAU,
-            WT_COIN,
-            WT_SPYM,
-            WT_SIVR,
-            WT_CRCL,
-            WT_BMNR,
-            WT_PPLT,
-            WT_QQQM,
-            WT_VWO,
-            WT_ARKK,
-            WT_SGOV
-        ];
-        string[FORK_VAULT_COUNT] memory labels = [
-            "NVDA",
-            "AMZN",
-            "TSLA",
-            "MSTR",
-            "IAU",
-            "COIN",
-            "SPYM",
-            "SIVR",
-            "CRCL",
-            "BMNR",
-            "PPLT",
-            "QQQM",
-            "VWO",
-            "ARKK",
-            "SGOV"
-        ];
-        for (uint256 i = 0; i < FORK_VAULT_COUNT; i++) {
-            checkVault(vaults[i], labels[i]);
         }
     }
 }
