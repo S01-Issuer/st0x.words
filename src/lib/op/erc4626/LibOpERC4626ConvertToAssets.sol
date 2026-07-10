@@ -14,7 +14,7 @@ library LibOpERC4626ConvertToAssets {
     /// The declared-inputs and declared-outputs parameters are intentionally ignored; arity
     /// is fixed at 2-in/1-out and is enforced by the parser comparing these return values
     /// against the declared counts in the source expression.
-    /// @return The number of inputs required: 2 (vault address as Float, shares as Float).
+    /// @return The number of inputs required: 2 (vault address as raw stack bits, shares as Float).
     /// @return The number of outputs produced: 1 (assets as Float).
     function integrity(OperandV2, uint256, uint256) internal pure returns (uint256, uint256) {
         return (2, 1);
@@ -23,7 +23,9 @@ library LibOpERC4626ConvertToAssets {
     /// Runs the erc4626-convert-to-assets operation.
     /// Reads the vault address (raw stack bits) and share amount from the
     /// stack, calls ERC-4626 convertToAssets, and pushes the resulting asset
-    /// amount.
+    /// amount. Rounding follows the vault's convertToAssets: per EIP-4626
+    /// this rounds DOWN (toward zero), favouring the vault; the caller
+    /// receives fewer assets than the exact mathematical result.
     /// @dev This word performs no validation of the vault or its returned
     /// values beyond Float packing; the result carries whatever trust the
     /// expression places in the vault it names.
@@ -31,7 +33,8 @@ library LibOpERC4626ConvertToAssets {
     /// @param inputs [vault address as raw stack bits, shares as Float
     /// interpreted at the vault's share decimals].
     /// @return outputs a single-element stack: [assets as Float at the
-    /// underlying asset token's decimals].
+    /// underlying asset token's decimals, rounded down per the vault's
+    /// convertToAssets].
     function run(OperandV2 operand, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
         bytes32 vault;
         Float sharesFloat;

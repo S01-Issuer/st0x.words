@@ -14,7 +14,7 @@ library LibOpERC4626ConvertToShares {
     /// The declared-inputs and declared-outputs parameters are intentionally ignored; arity
     /// is fixed at 2-in/1-out and is enforced by the parser comparing these return values
     /// against the declared counts in the source expression.
-    /// @return The number of inputs required: 2 (vault address as Float, assets as Float).
+    /// @return The number of inputs required: 2 (vault address as raw stack bits, assets as Float).
     /// @return The number of outputs produced: 1 (shares as Float).
     function integrity(OperandV2, uint256, uint256) internal pure returns (uint256, uint256) {
         return (2, 1);
