@@ -3,14 +3,14 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {ERC4626Words} from "src/concrete/ERC4626Words.sol";
+import {ERC4626Words} from "../../../src/concrete/ERC4626Words.sol";
 import {
     BYTECODE_HASH,
     OPCODE_FUNCTION_POINTERS,
     INTEGRITY_FUNCTION_POINTERS,
     SUB_PARSER_WORD_PARSERS,
     OPERAND_HANDLER_FUNCTION_POINTERS
-} from "src/generated/ERC4626Words.pointers.sol";
+} from "../../../src/generated/ERC4626Words.pointers.sol";
 
 /// @notice Asserts committed pointer constants equal freshly-built equivalents.
 /// Covers HIGH issues: pointer/integrity dispatch tables can silently drift
@@ -52,6 +52,10 @@ contract ERC4626WordsPointersTest is Test {
             OPERAND_HANDLER_FUNCTION_POINTERS,
             "operand handler pointers drifted from committed"
         );
+    }
+
+    function testLiteralParserFunctionPointersEmpty() external view {
+        assertEq(words.buildLiteralParserFunctionPointers(), bytes(""), "literal parser pointers must be empty");
     }
 
     function testOpcodeFunctionPointersLengthIsNonZero() external pure {
