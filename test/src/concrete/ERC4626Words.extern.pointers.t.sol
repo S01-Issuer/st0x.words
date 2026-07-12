@@ -54,8 +54,14 @@ contract ERC4626WordsExternPointersTest is Test {
         );
     }
 
-    /// @dev Each 2-byte integrity slot must be non-zero; zero means an opcode was never assigned.
-    function testIntegritySlotsAreDistinctlyAssigned() external view {
+    /// @dev Each 2-byte integrity slot must be non-zero; zero means an opcode
+    /// was never assigned. Slot values are NOT pairwise distinct: both words'
+    /// integrity functions are extensionally identical (2 inputs, 1 output),
+    /// so the compiler deduplicates them to a single function pointer and the
+    /// table legitimately repeats one value. Wrong-wiring between the two is
+    /// covered behaviorally by the bad-arity parse tests in
+    /// ERC4626Words.parse.t.sol.
+    function testIntegritySlotsAreAssigned() external view {
         bytes memory pointers = words.buildIntegrityFunctionPointers();
         assertEq(pointers.length, OPCODE_FUNCTION_POINTERS_LENGTH * 2, "integrity table wrong length");
         for (uint256 i = 0; i < OPCODE_FUNCTION_POINTERS_LENGTH; i++) {
