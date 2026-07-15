@@ -18,14 +18,14 @@ dependencies are managed with **soldeer** (`foundry.toml` `[dependencies]`,
 Use `nix develop github:rainlanguage/rainix#sol-shell` for forge/soldeer, or
 `nix develop` for the repo devshell (`rain`, `erc4626-words-prelude`).
 
-| Task                   | Command                                                                                     |
-| ---------------------- | ------------------------------------------------------------------------------------------- |
-| Install deps           | `nix develop github:rainlanguage/rainix#sol-shell -c forge soldeer install`                 |
-| Build                  | `nix develop github:rainlanguage/rainix#sol-shell -c forge build`                           |
-| Test                   | `nix develop github:rainlanguage/rainix#sol-shell -c forge test`                            |
-| Regenerate meta + CBOR | `./script/build.sh` or `nix develop -c erc4626-words-prelude`                               |
+| Task                   | Command                                                                             |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| Install deps           | `nix develop github:rainlanguage/rainix#sol-shell -c forge soldeer install`         |
+| Build                  | `nix develop github:rainlanguage/rainix#sol-shell -c forge build`                   |
+| Test                   | `nix develop github:rainlanguage/rainix#sol-shell -c forge test`                    |
+| Regenerate meta + CBOR | `./script/build.sh` or `nix develop -c erc4626-words-prelude`                       |
 | Regenerate pointers    | `nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol` |
-| Format                 | `nix develop github:rainlanguage/rainix#sol-shell -c forge fmt`                             |
+| Format                 | `nix develop github:rainlanguage/rainix#sol-shell -c forge fmt`                     |
 
 Regenerate artifacts the way **Git is clean** CI does:
 
