@@ -24,14 +24,14 @@ Use `nix develop github:rainlanguage/rainix#sol-shell` for forge/soldeer, or
 | Build                  | `nix develop github:rainlanguage/rainix#sol-shell -c forge build`                           |
 | Test                   | `nix develop github:rainlanguage/rainix#sol-shell -c forge test`                            |
 | Regenerate meta + CBOR | `./script/build.sh` or `nix develop -c erc4626-words-prelude`                               |
-| Regenerate pointers    | `nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol` |
+| Regenerate pointers    | `nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol` |
 | Format                 | `nix develop github:rainlanguage/rainix#sol-shell -c forge fmt`                             |
 
 Regenerate artifacts the way **Git is clean** CI does:
 
 ```sh
 ./script/build.sh
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 nix develop github:rainlanguage/rainix#sol-shell -c forge fmt
 git diff --exit-code
 ```
@@ -47,7 +47,7 @@ Commit `meta/ERC4626Words.rain.meta` and
 - `src/generated/ERC4626Words.pointers.sol` — Generated; do not edit by hand
 - `script/BuildAuthoringMeta.sol` — Emits authoring meta
 - `script/build.sh` — Meta CBOR wrap via `rain meta build` (CI hook)
-- `script/BuildPointers.sol` — Regenerates pointer constants
+- `script/Build.sol` — Regenerates pointer constants
 - `flake.nix` — Defines `erc4626-words-prelude` nix task
 
 ## Key Configuration

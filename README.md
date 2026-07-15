@@ -86,7 +86,7 @@ then regenerate the pointer constants (which read the meta):
 
 ```sh
 ./script/build.sh
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 nix develop github:rainlanguage/rainix#sol-shell -c forge fmt
 ```
 
@@ -94,7 +94,7 @@ Equivalent via flake prelude + pointer script:
 
 ```sh
 nix run .#erc4626-words-prelude
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 ```
 
 The generated files `src/generated/ERC4626Words.pointers.sol` and
