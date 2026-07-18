@@ -19,7 +19,9 @@ library LibOpERC4626ConvertToAssets {
     /// Runs the erc4626-convert-to-assets operation.
     /// Reads the vault address (raw stack bits) and share amount from the
     /// stack, calls ERC-4626 convertToAssets, and pushes the resulting asset
-    /// amount.
+    /// amount. Rounding follows the vault's convertToAssets: per EIP-4626
+    /// this rounds DOWN (toward zero), favouring the vault; the caller
+    /// receives fewer assets than the exact mathematical result.
     /// @dev This word performs no validation of the vault or its returned
     /// values beyond Float packing; the result carries whatever trust the
     /// expression places in the vault it names.
@@ -27,7 +29,8 @@ library LibOpERC4626ConvertToAssets {
     /// @param inputs [vault address as raw stack bits, shares as Float
     /// interpreted at the vault's share decimals].
     /// @return outputs a single-element stack: [assets as Float at the
-    /// underlying asset token's decimals].
+    /// underlying asset token's decimals, rounded down per the vault's
+    /// convertToAssets].
     function run(OperandV2 operand, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
         if (inputs.length < 2) revert UnexpectedInputs(2, inputs.length);
         bytes32 vault;
