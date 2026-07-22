@@ -7,6 +7,8 @@ import {Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LibERC4626, IERC4626Minimal} from "../../erc4626/LibERC4626.sol";
 import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 
+error UnexpectedInputs(uint256 expected, uint256 actual);
+
 library LibOpERC4626ConvertToAssets {
     /// Extern integrity for erc4626-convert-to-assets.
     /// Always requires 2 inputs (vault address, shares) and produces 1 output (assets).
@@ -36,6 +38,7 @@ library LibOpERC4626ConvertToAssets {
     /// underlying asset token's decimals, rounded down per the vault's
     /// convertToAssets].
     function run(OperandV2 operand, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
+        if (inputs.length < 2) revert UnexpectedInputs(2, inputs.length);
         bytes32 vault;
         Float sharesFloat;
         assembly ("memory-safe") {
