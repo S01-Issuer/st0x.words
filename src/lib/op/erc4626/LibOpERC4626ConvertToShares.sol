@@ -7,6 +7,8 @@ import {Float} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {LibERC4626, IERC4626Minimal} from "../../erc4626/LibERC4626.sol";
 import {NotAnAddress} from "rainlang-0.1.2/src/error/ErrRainType.sol";
 
+error UnexpectedInputs(uint256 expected, uint256 actual);
+
 library LibOpERC4626ConvertToShares {
     /// Extern integrity for erc4626-convert-to-shares.
     /// Always requires 2 inputs (vault address, assets) and produces 1 output (shares).
@@ -20,12 +22,16 @@ library LibOpERC4626ConvertToShares {
     /// amount. Rounding follows the vault's convertToShares: per EIP-4626
     /// this rounds DOWN (toward zero), favouring the vault; the caller
     /// receives fewer shares than the exact mathematical result.
+    /// @dev This word performs no validation of the vault or its returned
+    /// values beyond Float packing; the result carries whatever trust the
+    /// expression places in the vault it names.
     /// @param operand Unused operand for this extern word.
     /// @param inputs [vault address as raw stack bits, assets as Float
     /// interpreted at the underlying asset token's decimals].
     /// @return outputs a single-element stack: [shares as Float at the vault's
     /// share decimals, rounded down per the vault's convertToShares].
     function run(OperandV2 operand, StackItem[] memory inputs) internal view returns (StackItem[] memory) {
+        if (inputs.length < 2) revert UnexpectedInputs(2, inputs.length);
         bytes32 vault;
         Float assetsFloat;
         assembly ("memory-safe") {

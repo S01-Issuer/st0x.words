@@ -10,7 +10,7 @@ import {LibGenParseMeta} from "rain-interpreter-interface-0.1.0/src/lib/codegen/
 import {LibERC4626SubParser} from "src/lib/parse/LibERC4626SubParser.sol";
 import {PARSE_META_BUILD_DEPTH} from "src/abstract/ERC4626SubParser.sol";
 
-contract BuildPointers is Script {
+contract Build is Script {
     function buildERC4626WordsPointers() internal {
         ERC4626Words erc4626Words = new ERC4626Words();
 
