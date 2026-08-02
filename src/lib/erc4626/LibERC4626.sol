@@ -42,13 +42,19 @@ library LibERC4626 {
     /// The shares amount is passed as a Rain Float with the vault's share decimals.
     /// @dev ERC-4626 mandates that convertToAssets rounds DOWN (toward zero). The result
     /// is therefore the floor of the true share-to-asset conversion, not an exact equivalent.
-    /// Callers must ensure that under-counting assets is safe for their use-site
-    /// (i.e. the non-interactive party is not shorted by the floor rounding).
+    /// Precision loss of up to 1 ulp per call favours the caller (order owner /
+    /// share-holder): fewer assets are returned than the exact mathematical result,
+    /// so any Rain order using this word to price its output pays out less than the
+    /// ideal rate. Callers must ensure that under-counting assets is safe for their
+    /// use-site (i.e. the non-interactive party is not shorted by the floor rounding).
+    /// An adversarial vault can engineer its exchange rate so that the truncated
+    /// remainder is maximal on every call.
     /// @dev Reverts if `sharesFloat` cannot be losslessly represented at the vault's share
     /// decimal precision (e.g. a Float encoding 1e-19 with an 18-decimal vault).
     /// @param vault The ERC-4626 vault contract.
     /// @param sharesFloat The number of shares to convert, as a Rain Float.
-    /// @return The equivalent amount of underlying assets, as a Rain Float.
+    /// @return The equivalent amount of underlying assets, as a Rain Float,
+    /// floor-rounded per the vault's convertToAssets implementation.
     function convertToAssets(IERC4626Minimal vault, Float sharesFloat) internal view returns (Float) {
         (uint8 shareDecimals, uint8 assetDecimals) = _vaultScales(vault);
         uint256 sharesRaw = LibDecimalFloat.toFixedDecimalLossless(sharesFloat, shareDecimals);
@@ -60,13 +66,19 @@ library LibERC4626 {
     /// The assets amount is passed as a Rain Float with the underlying asset's decimals.
     /// @dev ERC-4626 mandates that convertToShares rounds DOWN (toward zero). The result
     /// is therefore the floor of the true asset-to-share conversion, not an exact equivalent.
-    /// Callers must ensure that under-counting shares is safe for their use-site
-    /// (i.e. the non-interactive party is not shorted by the floor rounding).
+    /// Precision loss of up to 1 ulp per call favours the caller (order owner /
+    /// share-holder): fewer shares are returned than the exact mathematical result,
+    /// so any Rain order using this word to price its output pays out less than the
+    /// ideal rate. Callers must ensure that under-counting shares is safe for their
+    /// use-site (i.e. the non-interactive party is not shorted by the floor rounding).
+    /// An adversarial vault can engineer its exchange rate so that the truncated
+    /// remainder is maximal on every call.
     /// @dev Reverts if `assetsFloat` cannot be losslessly represented at the underlying
     /// asset's decimal precision (e.g. a Float encoding 1e-7 with a 6-decimal asset).
     /// @param vault The ERC-4626 vault contract.
     /// @param assetsFloat The amount of underlying assets to convert, as a Rain Float.
-    /// @return The equivalent number of vault shares, as a Rain Float.
+    /// @return The equivalent number of vault shares, as a Rain Float,
+    /// floor-rounded per the vault's convertToShares implementation.
     function convertToShares(IERC4626Minimal vault, Float assetsFloat) internal view returns (Float) {
         (uint8 shareDecimals, uint8 assetDecimals) = _vaultScales(vault);
         uint256 assetsRaw = LibDecimalFloat.toFixedDecimalLossless(assetsFloat, assetDecimals);

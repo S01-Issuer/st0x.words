@@ -22,6 +22,7 @@ library LibOpERC4626ConvertToAssets {
     /// amount. Rounding follows the vault's convertToAssets: per EIP-4626
     /// this rounds DOWN (toward zero), favouring the vault; the caller
     /// receives fewer assets than the exact mathematical result.
+    /// @dev See LibERC4626.convertToAssets for the full rounding analysis.
     /// @dev This word performs no validation of the vault or its returned
     /// values beyond Float packing; the result carries whatever trust the
     /// expression places in the vault it names.
