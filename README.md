@@ -79,14 +79,14 @@ Requires soldeer dependencies to be installed first (see above).
 forge test
 ```
 
-### Regenerate pointers
+### Regenerate meta and pointer artifacts
 
-Run the prelude to produce the CBOR-encoded meta, then regenerate the pointer
-constants:
+Two separate steps must run in order: first regenerate the CBOR-encoded meta,
+then regenerate the pointer constants (which read the meta):
 
 ```sh
 ./script/build.sh
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 nix develop github:rainlanguage/rainix#sol-shell -c forge fmt
 ```
 
@@ -94,13 +94,13 @@ Equivalent via flake prelude + pointer script:
 
 ```sh
 nix run .#erc4626-words-prelude
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 ```
 
-The generated file `src/generated/ERC4626Words.pointers.sol` and
+The generated files `src/generated/ERC4626Words.pointers.sol` and
 `meta/ERC4626Words.rain.meta` must be committed. The **Git is clean** CI job
-runs `script/build.sh`, `script/BuildPointers.sol`, format, and fails on
-`git diff --exit-code`.
+calls the reusable `rainix-copy-artifacts` workflow, which re-runs these steps
+and fails with `git diff --exit-code` if any committed file has drifted.
 
 ### Deploy
 
@@ -124,6 +124,7 @@ tab, selecting the target network.
 
 Required secrets (for the Manual sol artifacts deploy workflow, network=base):
 `PRIVATE_KEY`, `CI_DEPLOY_BASE_RPC_URL`, `CI_DEPLOY_BASE_ETHERSCAN_API_KEY`,
-`CI_DEPLOY_BASE_VERIFY`, `CI_DEPLOY_BASE_VERIFIER`, `CI_DEPLOY_BASE_VERIFIER_URL`.
-For other networks substitute `BASE` with the network name in uppercase.
-The CI workflows also use `CACHIX_AUTH_TOKEN` (org-level, passed via `secrets: inherit`).
+`CI_DEPLOY_BASE_VERIFY`, `CI_DEPLOY_BASE_VERIFIER`,
+`CI_DEPLOY_BASE_VERIFIER_URL`. For other networks substitute `BASE` with the
+network name in uppercase. The CI workflows also use `CACHIX_AUTH_TOKEN`
+(org-level, passed via `secrets: inherit`).

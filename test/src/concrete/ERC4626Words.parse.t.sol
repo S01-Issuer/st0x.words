@@ -15,6 +15,7 @@ import {LibContext} from "rain-interpreter-interface-0.1.0/src/lib/caller/LibCon
 import {SignedContextV1} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterCallerV4.sol";
 import {Float, LibDecimalFloat} from "rain-math-float-0.1.1/src/lib/LibDecimalFloat.sol";
 import {Strings} from "@openzeppelin-contracts-5.6.1/utils/Strings.sol";
+import {ExternIntegrityInputsMismatch} from "rainlang-0.1.2/src/error/ErrExtern.sol";
 import {ERC4626Words} from "../../../src/concrete/ERC4626Words.sol";
 import {MockERC4626, MockERC20} from "../../utils/MockERC4626.sol";
 
@@ -129,5 +130,59 @@ contract ERC4626WordsParseTest is RainlangExpressionDeployerDeploymentTest {
             StackItem.unwrap(stackAssets[0]) != StackItem.unwrap(stackShares[0]),
             "erc4626-convert-to-assets and erc4626-convert-to-shares must parse to distinct opcodes"
         );
+    }
+
+    /// @dev A source giving erc4626-convert-to-assets too few inputs (1 instead
+    /// of 2) must fail the deploy-time integrity pass with the exact
+    /// ExternIntegrityInputsMismatch raised when the bytecode arity (1 input)
+    /// disagrees with the word's integrity function (2 inputs).
+    function testParseConvertToAssetsTooFewInputsFailsIntegrity() external {
+        bytes memory source = bytes(
+            string.concat(
+                "using-words-from ",
+                Strings.toHexString(address(words)),
+                " _: erc4626-convert-to-assets(",
+                Strings.toHexString(address(vault)),
+                ");"
+            )
+        );
+        vm.expectRevert(abi.encodeWithSelector(ExternIntegrityInputsMismatch.selector, 1, 2));
+        I_DEPLOYER.parse2(source);
+    }
+
+    /// @dev A source giving erc4626-convert-to-assets too many inputs (3
+    /// instead of 2) must fail the deploy-time integrity pass with the exact
+    /// ExternIntegrityInputsMismatch raised when the bytecode arity (3 inputs)
+    /// disagrees with the word's integrity function (2 inputs).
+    function testParseConvertToAssetsTooManyInputsFailsIntegrity() external {
+        bytes memory source = bytes(
+            string.concat(
+                "using-words-from ",
+                Strings.toHexString(address(words)),
+                " _: erc4626-convert-to-assets(",
+                Strings.toHexString(address(vault)),
+                " 1 1);"
+            )
+        );
+        vm.expectRevert(abi.encodeWithSelector(ExternIntegrityInputsMismatch.selector, 3, 2));
+        I_DEPLOYER.parse2(source);
+    }
+
+    /// @dev A source giving erc4626-convert-to-shares too few inputs (1 instead
+    /// of 2) must fail the deploy-time integrity pass with the exact
+    /// ExternIntegrityInputsMismatch raised when the bytecode arity (1 input)
+    /// disagrees with the word's integrity function (2 inputs).
+    function testParseConvertToSharesTooFewInputsFailsIntegrity() external {
+        bytes memory source = bytes(
+            string.concat(
+                "using-words-from ",
+                Strings.toHexString(address(words)),
+                " _: erc4626-convert-to-shares(",
+                Strings.toHexString(address(vault)),
+                ");"
+            )
+        );
+        vm.expectRevert(abi.encodeWithSelector(ExternIntegrityInputsMismatch.selector, 1, 2));
+        I_DEPLOYER.parse2(source);
     }
 }
