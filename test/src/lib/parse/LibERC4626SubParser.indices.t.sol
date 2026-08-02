@@ -9,12 +9,12 @@ import {
     SUB_PARSER_WORD_ERC4626_CONVERT_TO_SHARES,
     SUB_PARSER_WORD_PARSERS_LENGTH,
     LibERC4626SubParser
-} from "src/lib/parse/LibERC4626SubParser.sol";
+} from "../../../../src/lib/parse/LibERC4626SubParser.sol";
 import {
     OPCODE_ERC4626_CONVERT_TO_ASSETS,
     OPCODE_ERC4626_CONVERT_TO_SHARES,
     OPCODE_FUNCTION_POINTERS_LENGTH
-} from "src/abstract/ERC4626Extern.sol";
+} from "../../../../src/abstract/ERC4626Extern.sol";
 
 /// @notice Asserts that the parallel index constants in ERC4626Extern and
 /// LibERC4626SubParser agree, and that the authoring-meta array is indexed by
