@@ -9,6 +9,6 @@
 set -euo pipefail
 nix develop -c erc4626-words-prelude
 nix develop -c bash -euo pipefail -c '
-  forge script --silent ./script/BuildPointers.sol
+  forge script --silent ./script/Build.sol
   forge fmt
 '

@@ -81,21 +81,28 @@ forge test
 
 ### Regenerate meta and pointer artifacts
 
-Two separate steps must run in order: first regenerate the CBOR-encoded meta,
-then regenerate the pointer constants (which read the meta):
+One step regenerates everything. `./script/build.sh` runs, in order, the
+CBOR-encoded meta build, the pointer constants (which read the meta), and
+`forge fmt`:
 
 ```sh
 ./script/build.sh
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
-nix develop github:rainlanguage/rainix#sol-shell -c forge fmt
 ```
 
-Equivalent via flake prelude + pointer script:
+Both stages run in the repo's own default devshell, which provides `rain` and
+`forge`, so no external shell reference is needed. Soldeer dependencies must be
+installed first (see above).
+
+The individual stages, if you need one on its own:
 
 ```sh
 nix run .#erc4626-words-prelude
 nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge fmt
 ```
+
+The prelude alone regenerates only the meta; it is not a substitute for
+`./script/build.sh`.
 
 The generated files `src/generated/ERC4626Words.pointers.sol` and
 `meta/ERC4626Words.rain.meta` must be committed. The **Git is clean** CI job
