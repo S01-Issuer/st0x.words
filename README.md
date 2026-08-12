@@ -86,7 +86,7 @@ then regenerate the pointer constants (which read the meta):
 
 ```sh
 ./script/build.sh
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 nix develop github:rainlanguage/rainix#sol-shell -c forge fmt
 ```
 
@@ -94,7 +94,7 @@ Equivalent via flake prelude + pointer script:
 
 ```sh
 nix run .#erc4626-words-prelude
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 ```
 
 The generated files `src/generated/ERC4626Words.pointers.sol` and
@@ -124,6 +124,7 @@ tab, selecting the target network.
 
 Required secrets (for the Manual sol artifacts deploy workflow, network=base):
 `PRIVATE_KEY`, `CI_DEPLOY_BASE_RPC_URL`, `CI_DEPLOY_BASE_ETHERSCAN_API_KEY`,
-`CI_DEPLOY_BASE_VERIFY`, `CI_DEPLOY_BASE_VERIFIER`, `CI_DEPLOY_BASE_VERIFIER_URL`.
-For other networks substitute `BASE` with the network name in uppercase.
-The CI workflows also use `CACHIX_AUTH_TOKEN` (org-level, passed via `secrets: inherit`).
+`CI_DEPLOY_BASE_VERIFY`, `CI_DEPLOY_BASE_VERIFIER`,
+`CI_DEPLOY_BASE_VERIFIER_URL`. For other networks substitute `BASE` with the
+network name in uppercase. The CI workflows also use `CACHIX_AUTH_TOKEN`
+(org-level, passed via `secrets: inherit`).
