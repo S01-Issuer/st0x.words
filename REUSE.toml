@@ -8,7 +8,6 @@ path = [
   "README.md",
   "flake.lock",
   "flake.nix",
-  "foundry.lock",
   "foundry.toml",
   "meta/**",
   "REUSE.toml",
