@@ -10,11 +10,11 @@ pragma solidity ^0.8.25;
 // file needs the contract to exist so that it can be compiled.
 
 /// @dev Hash of the known bytecode.
-bytes32 constant BYTECODE_HASH = bytes32(0x9905f7f79bbbbea0cde049efb56d1aed955479c30db2ee9b6eeae543e3b33bfb);
+bytes32 constant BYTECODE_HASH = bytes32(0x7c48ecdfa342cf99e4f4af1ed7e09c5cb9389561681b21dccce1411f7c61311e);
 
 /// @dev The deterministic deploy address of the contract when deployed via
 /// the Zoltu factory.
-address constant DEPLOYED_ADDRESS = address(0xEcc14720E4BC47976411E4b6Dd1c0FFFf595EC6D);
+address constant DEPLOYED_ADDRESS = address(0x03e3f0C80332fB1b57EC884E9d481bAa58969883);
 
 /// @dev The hash of the meta that describes the contract.
 bytes32 constant DESCRIBED_BY_META_HASH = bytes32(0xdde475220ea06da58884f3f7abbfc091637e02cb924b8b9a8a9d20dbd4ae703a);
@@ -51,13 +51,13 @@ bytes constant SUB_PARSER_WORD_PARSERS = hex"084d086d";
 /// @dev Every two bytes is a function pointer for an operand handler.
 /// These positional indexes all map to the same indexes looked up in the parse
 /// meta.
-bytes constant OPERAND_HANDLER_FUNCTION_POINTERS = hex"0c8f0c8f";
+bytes constant OPERAND_HANDLER_FUNCTION_POINTERS = hex"0ceb0ceb";
 
 /// @dev The function pointers for the integrity check fns.
-bytes constant INTEGRITY_FUNCTION_POINTERS = hex"0c830c83";
+bytes constant INTEGRITY_FUNCTION_POINTERS = hex"0cdf0cdf";
 
 /// @dev The function pointers known to the interpreter for dynamic dispatch.
 /// By setting these as a constant they can be inlined into the interpreter
 /// and loaded at eval time for very low gas (~100) due to the compiler
 /// optimising it to a single `codecopy` to build the in memory bytes array.
-bytes constant OPCODE_FUNCTION_POINTERS = hex"090f0973";
+bytes constant OPCODE_FUNCTION_POINTERS = hex"090f09a1";

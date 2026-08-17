@@ -11,7 +11,7 @@ import {LibERC4626SubParser} from "src/lib/parse/LibERC4626SubParser.sol";
 import {PARSE_META_BUILD_DEPTH} from "src/abstract/ERC4626SubParser.sol";
 import {LibRainDeploy} from "rain-deploy-0.1.4/src/lib/LibRainDeploy.sol";
 
-contract BuildPointers is Script {
+contract Build is Script {
     /// @notice Generates the Solidity constant declaration for the
     /// deterministic Zoltu deploy address.
     function addressConstantString(address addr) internal pure returns (string memory) {

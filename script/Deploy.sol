@@ -7,7 +7,7 @@ import {ERC4626Words} from "../src/concrete/ERC4626Words.sol";
 import {IMetaBoardV1_2} from "rain-metadata-0.1.0/src/interface/unstable/IMetaBoardV1_2.sol";
 import {LibDescribedByMeta} from "rain-metadata-0.1.0/src/lib/LibDescribedByMeta.sol";
 import {LibRainDeploy} from "rain-deploy-0.1.4/src/lib/LibRainDeploy.sol";
-import {LibERC4626WordsDeploy} from "../src/lib/deploy/LibERC4626WordsDeploy.sol";
+import {DEPLOYED_ADDRESS, BYTECODE_HASH} from "../src/generated/ERC4626Words.pointers.sol";
 
 /// @dev Deterministic MetaBoard address deployed via Zoltu factory, identical
 /// on every supported network.
@@ -18,9 +18,13 @@ address constant METABOARD_ADDRESS = 0xfb8437AeFBB8031064E274527C5fc08e30Ac6928;
 /// Deploys `ERC4626Words` deterministically via the Zoltu factory to every
 /// rain supported network and emits its described-by meta to the
 /// MetaBoard in the same broadcast. There are no deploy-time choices: one
-/// dispatch covers all networks, the address is precommitted in the generated
-/// pointers, and an already-deployed network is skipped idempotently (the meta
-/// was emitted when it deployed).
+/// dispatch covers all networks, the target address and code hash are the
+/// generated pointer constants of the source in this checkout, and an
+/// already-deployed network is skipped idempotently (the meta was emitted when
+/// it deployed).
+///
+/// This script is a manual dispatch only. Nothing in the repository asserts
+/// that any network has been deployed, so no merge waits on a deploy.
 contract Deploy is Script {
     /// The networks this contract deploys to: every rain supported network.
     /// Deployment is deterministic so the address is identical everywhere.
@@ -40,7 +44,7 @@ contract Deploy is Script {
             uint256 forkId = vm.createSelectFork(nets[i]);
             (forkId);
 
-            if (LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS.code.length == 0) {
+            if (DEPLOYED_ADDRESS.code.length == 0) {
                 if (LibRainDeploy.ZOLTU_FACTORY.code.length == 0) {
                     revert LibRainDeploy.MissingDependency(nets[i], LibRainDeploy.ZOLTU_FACTORY);
                 }
@@ -58,10 +62,8 @@ contract Deploy is Script {
 
                 vm.startBroadcast(deployer);
                 address deployed = LibRainDeploy.deployZoltu(type(ERC4626Words).creationCode);
-                if (deployed != LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS) {
-                    revert LibRainDeploy.UnexpectedDeployedAddress(
-                        LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS, deployed
-                    );
+                if (deployed != DEPLOYED_ADDRESS) {
+                    revert LibRainDeploy.UnexpectedDeployedAddress(DEPLOYED_ADDRESS, deployed);
                 }
                 LibDescribedByMeta.emitForDescribedAddress(
                     IMetaBoardV1_2(METABOARD_ADDRESS), ERC4626Words(deployed), subParserDescribedByMeta
@@ -69,14 +71,8 @@ contract Deploy is Script {
                 vm.stopBroadcast();
             }
 
-            if (
-                LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS.codehash
-                    != LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_CODEHASH
-            ) {
-                revert LibRainDeploy.UnexpectedDeployedCodeHash(
-                    LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_CODEHASH,
-                    LibERC4626WordsDeploy.ERC4626_WORDS_DEPLOYED_ADDRESS.codehash
-                );
+            if (DEPLOYED_ADDRESS.codehash != BYTECODE_HASH) {
+                revert LibRainDeploy.UnexpectedDeployedCodeHash(BYTECODE_HASH, DEPLOYED_ADDRESS.codehash);
             }
         }
     }

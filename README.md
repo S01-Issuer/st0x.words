@@ -86,7 +86,7 @@ then regenerate the pointer constants (which read the meta):
 
 ```sh
 ./script/build.sh
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 nix develop github:rainlanguage/rainix#sol-shell -c forge fmt
 ```
 
@@ -94,7 +94,7 @@ Equivalent via flake prelude + pointer script:
 
 ```sh
 nix run .#erc4626-words-prelude
-nix develop github:rainlanguage/rainix#sol-shell -c forge script script/BuildPointers.sol
+nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 ```
 
 The generated files `src/generated/ERC4626Words.pointers.sol` and
@@ -105,17 +105,28 @@ and fails with `git diff --exit-code` if any committed file has drifted.
 ### Deploy
 
 ```sh
-DEPLOYMENT_KEY=<private-key> forge script script/Deploy.sol \
-  --rpc-url <rpc-url> \
-  --broadcast \
-  --verify
+ARBITRUM_RPC_URL=<url> BASE_RPC_URL=<url> BASE_SEPOLIA_RPC_URL=<url> \
+  FLARE_RPC_URL=<url> POLYGON_RPC_URL=<url> \
+  DEPLOYMENT_KEY=<private-key> \
+  forge script script/Deploy.sol --slow --broadcast --verify
 ```
+
+There is no `--rpc-url`: the script selects each network's fork itself from the
+`[rpc_endpoints]` aliases in `foundry.toml`, which read the env vars above.
 
 Or trigger the **Manual sol artifacts** GitHub Actions workflow from the Actions
 tab. There is no network selection: the deploy script deterministically deploys
 via the Zoltu factory to every rain supported network (arbitrum, base,
-base_sepolia, flare, polygon), skipping networks where the pinned address
+base_sepolia, flare, polygon), skipping networks where the deterministic address
 already has code, and emits the described-by meta to the MetaBoard.
+
+Deploying is a **manual dispatch, decoupled from merging**. Nothing in this
+repository asserts that any network has been deployed, and no test reads chain
+state for a deployment, so no pull request waits on a deploy. The deploy target
+is `DEPLOYED_ADDRESS` in the generated pointers — the Zoltu address of the
+source in the checkout being deployed — so redeploying changed bytecode lands at
+a new address by construction, with `BYTECODE_HASH` pinning what must be there
+when the script finishes.
 
 ## CI
 
@@ -125,9 +136,11 @@ already has code, and emits the described-by meta to the MetaBoard.
 | **Git is clean**         | push            | Reusable `rainix-copy-artifacts`: meta, pointers, format, fails if dirty              |
 | **Manual sol artifacts** | manual dispatch | Deterministic Zoltu deploy to script-defined networks (`rainix-manual-sol-artifacts`) |
 
-Required secrets (for the Manual sol artifacts deploy workflow, network=base):
-`PRIVATE_KEY`, `CI_DEPLOY_BASE_RPC_URL`, `CI_DEPLOY_BASE_ETHERSCAN_API_KEY`,
-`CI_DEPLOY_BASE_VERIFY`, `CI_DEPLOY_BASE_VERIFIER`,
-`CI_DEPLOY_BASE_VERIFIER_URL`. For other networks substitute `BASE` with the
-network name in uppercase. The CI workflows also use `CACHIX_AUTH_TOKEN`
-(org-level, passed via `secrets: inherit`).
+Secrets for the Manual sol artifacts deploy workflow are consumed by the rainix
+reusable and reach it via `secrets: inherit`: `PRIVATE_KEY` (the deployer key),
+`RPC_URL_<NETWORK>_FORK` for each deployed network (`ARBITRUM`, `BASE`,
+`BASE_SEPOLIA`, `FLARE`, `POLYGON` — a repo/org variable of the same name also
+works, and the reusable's preflight binds the reachable one to
+`<NETWORK>_RPC_URL`), `EXPLORER_VERIFICATION_KEY` for Etherscan-family
+verification, and `CI_DEPLOY_FLARE_ETHERSCAN_API_KEY` for Flare, which is not
+Etherscan. The CI workflows also use `CACHIX_AUTH_TOKEN` (org-level).
