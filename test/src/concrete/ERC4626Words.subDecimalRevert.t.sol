@@ -11,10 +11,24 @@ import {LossyConversionFromFloat} from "rain-math-float-0.1.1/src/error/ErrDecim
 import {MockERC4626} from "test/utils/MockERC4626.sol";
 import {MockERC20} from "test/utils/MockERC20.sol";
 
-/// @notice Fuzz tests asserting that sub-decimal inputs revert with LossyConversionFromFloat.
+/// @notice Fuzz tests asserting that sub-decimal inputs revert with LossyConversionFromFloat
+/// when dispatched through the EXTERN entry point.
+///
 /// A vault with 18-decimal shares and a 6-decimal asset; Float inputs with more decimal
 /// places than the token precision cannot be converted losslessly and must revert.
-contract ERC4626WordsRoundingTest is Test {
+///
+/// The revert itself is already pinned at the library level by
+/// `LibOpERC4626ConvertToAssets.t.sol` / `LibOpERC4626ConvertToShares.t.sol`, which call
+/// `run` directly. Those tests bypass the generated `OPCODE_FUNCTION_POINTERS` table, so
+/// they cannot show that the revert survives the extern dispatch. That is the gap this
+/// file covers: `ERC4626Words.extern` reaches each opcode's `run` through a 16-bit function
+/// pointer resolved in assembly, and these tests assert the revert propagates back out of
+/// that indirection with its `(significand, exponent)` arguments intact — for both opcodes,
+/// across the significand range rather than at a single point.
+///
+/// Extern-level coverage elsewhere (`ERC4626Words.conversions.t.sol`) exercises the success
+/// path only.
+contract ERC4626WordsSubDecimalRevertTest is Test {
     ERC4626Words internal words;
     MockERC20 internal asset;
     MockERC4626 internal vault;
