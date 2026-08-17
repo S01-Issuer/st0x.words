@@ -12,6 +12,14 @@ contract LibERC4626Test is Test {
     MockERC20 internal asset;
     MockERC4626 internal vault;
 
+    function _callConvertToAssets(IERC4626Minimal vault_, Float sharesFloat) external view returns (Float) {
+        return LibERC4626.convertToAssets(vault_, sharesFloat);
+    }
+
+    function _callConvertToShares(IERC4626Minimal vault_, Float assetsFloat) external view returns (Float) {
+        return LibERC4626.convertToShares(vault_, assetsFloat);
+    }
+
     /// @dev Set up a 1:1 vault with 18-decimal shares and 18-decimal assets.
     function setUp() external {
         asset = new MockERC20(18);
@@ -98,6 +106,29 @@ contract LibERC4626Test is Test {
 
         uint256 sharesRaw = LibDecimalFloat.toFixedDecimalLossless(sharesFloat, 18);
         assertEq(sharesRaw, 1e18, "1 USDC should be 1 share in a 1:1 USDC vault");
+    }
+
+    function testConvertToSharesRevertsOnLossyAssetsInput() external {
+        // 1e-19 has more precision than 18 decimal places; toFixedDecimalLossless must revert.
+        Float assetsFloat = LibDecimalFloat.packLossless(1, -19);
+        vm.expectRevert();
+        this._callConvertToShares(IERC4626Minimal(address(vault)), assetsFloat);
+    }
+
+    function testConvertToAssetsRevertsOnLossySharesInput() external {
+        // 1e-19 has more precision than 18 decimal places; toFixedDecimalLossless must revert.
+        Float sharesFloat = LibDecimalFloat.packLossless(1, -19);
+        vm.expectRevert();
+        this._callConvertToAssets(IERC4626Minimal(address(vault)), sharesFloat);
+    }
+
+    function testConvertToSharesRevertsOnLossyInputWithSixDecimalAsset() external {
+        MockERC20 usdc = new MockERC20(6);
+        MockERC4626 usdcVault = new MockERC4626(18, address(usdc), 1e6);
+        // 1e-7 has more precision than 6 decimal places; toFixedDecimalLossless must revert.
+        Float assetsFloat = LibDecimalFloat.packLossless(1, -7);
+        vm.expectRevert();
+        this._callConvertToShares(IERC4626Minimal(address(usdcVault)), assetsFloat);
     }
 
     function testConvertToAssetsRoundsDownWithFractionalShares() external {

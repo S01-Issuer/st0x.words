@@ -7,6 +7,7 @@ import {ERC4626Words} from "../../../src/concrete/ERC4626Words.sol";
 import {DESCRIBED_BY_META_HASH} from "../../../src/generated/ERC4626Words.pointers.sol";
 import {IDescribedByMetaV1} from "rain-metadata-0.1.0/src/interface/IDescribedByMetaV1.sol";
 import {IInterpreterExternV4} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterExternV4.sol";
+import {ISubParserV4} from "rain-interpreter-interface-0.1.0/src/interface/ISubParserV4.sol";
 import {IERC165} from "@openzeppelin-contracts-5.6.1/utils/introspection/IERC165.sol";
 
 contract ERC4626WordsMetaTest is Test {
@@ -43,6 +44,13 @@ contract ERC4626WordsMetaTest is Test {
         assertTrue(
             words.supportsInterface(type(IInterpreterExternV4).interfaceId),
             "must support IInterpreterExternV4 (Extern inheritance branch)"
+        );
+    }
+
+    function testSupportsInterfaceISubParserV4() external view {
+        assertTrue(
+            words.supportsInterface(type(ISubParserV4).interfaceId),
+            "must support ISubParserV4 (SubParser inheritance branch)"
         );
     }
 
