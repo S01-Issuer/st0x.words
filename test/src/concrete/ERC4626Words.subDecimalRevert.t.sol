@@ -17,17 +17,25 @@ import {MockERC20} from "test/utils/MockERC20.sol";
 /// A vault with 18-decimal shares and a 6-decimal asset; Float inputs with more decimal
 /// places than the token precision cannot be converted losslessly and must revert.
 ///
-/// The revert itself is already pinned at the library level by
-/// `LibOpERC4626ConvertToAssets.t.sol` / `LibOpERC4626ConvertToShares.t.sol`, which call
-/// `run` directly. Those tests bypass the generated `OPCODE_FUNCTION_POINTERS` table, so
-/// they cannot show that the revert survives the extern dispatch. That is the gap this
-/// file covers: `ERC4626Words.extern` reaches each opcode's `run` through a 16-bit function
-/// pointer resolved in assembly, and these tests assert the revert propagates back out of
-/// that indirection with its `(significand, exponent)` arguments intact — for both opcodes,
-/// across the significand range rather than at a single point.
+/// Scope, stated precisely, because most of the neighbouring ground is already covered:
 ///
-/// Extern-level coverage elsewhere (`ERC4626Words.conversions.t.sol`) exercises the success
-/// path only.
+/// - The revert BEHAVIOUR is pinned at the library level by `LibOpERC4626ConvertToAssets.t.sol`
+///   / `LibOpERC4626ConvertToShares.t.sol`, which call `run` directly.
+/// - The opcode ROUTING through the generated `OPCODE_FUNCTION_POINTERS` table is pinned by
+///   `ERC4626Words.extern.pointers.t.sol` and by the parse/eval tests. Swapping the two
+///   entries in `buildOpcodeFunctionPointers` is killed by those tests independently of
+///   this file.
+///
+/// What is NOT covered anywhere else: these are the only assertions in the suite that a
+/// revert propagates back OUT of `ERC4626Words.extern` at all. Every other extern-level and
+/// parse-level test exercises the success path. The extern entry point reaches each opcode's
+/// `run` through a 16-bit function pointer resolved in assembly inside `BaseRainlangExtern`
+/// — a dependency this repo consumes but does not own — so this file is a regression pin on
+/// that integration boundary: a `rainlang` upgrade that swallowed or re-wrapped a callee
+/// revert would surface here and nowhere else.
+///
+/// Note the honest limit of that claim: no mutation of THIS repo's own source is killed by
+/// these tests alone, so they buy boundary confidence rather than in-repo mutation coverage.
 contract ERC4626WordsSubDecimalRevertTest is Test {
     ERC4626Words internal words;
     MockERC20 internal asset;
