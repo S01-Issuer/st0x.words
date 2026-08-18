@@ -8,7 +8,7 @@ import {
     IInterpreterExternV4,
     EncodedExternDispatchV2
 } from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterExternV4.sol";
-import {LibExtern} from "rainlang-0.1.2/src/lib/extern/LibExtern.sol";
+import {LibExtern} from "rainlang-0.1.8/src/lib/extern/LibExtern.sol";
 import {
     OPCODE_ERC4626_CONVERT_TO_ASSETS,
     OPCODE_ERC4626_CONVERT_TO_SHARES
