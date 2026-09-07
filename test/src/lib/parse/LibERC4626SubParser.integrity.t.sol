@@ -2,8 +2,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.1/src/Test.sol";
-import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {Test} from "forge-std-1.16.2/src/Test.sol";
+import {OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 import {LibOpERC4626ConvertToAssets} from "src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
 import {LibOpERC4626ConvertToShares} from "src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
 import {LibERC4626SubParser} from "src/lib/parse/LibERC4626SubParser.sol";

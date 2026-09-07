@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.1/src/Test.sol";
+import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {ERC4626Words} from "../../../src/concrete/ERC4626Words.sol";
 import {
     BYTECODE_HASH,
@@ -10,7 +10,7 @@ import {
     INTEGRITY_FUNCTION_POINTERS,
     SUB_PARSER_WORD_PARSERS,
     OPERAND_HANDLER_FUNCTION_POINTERS
-} from "../../../src/generated/ERC4626Words.pointers.sol";
+} from "../../../src/generated/ERC4626WordsPointers.sol";
 
 /// @notice Asserts committed pointer constants equal freshly-built equivalents.
 /// Covers HIGH issues: pointer/integrity dispatch tables can silently drift

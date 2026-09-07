@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.1/src/Test.sol";
+import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {OPCODE_FUNCTION_POINTERS_LENGTH} from "../../../src/abstract/ERC4626Extern.sol";
 import {SUB_PARSER_WORD_PARSERS_LENGTH} from "../../../src/lib/parse/LibERC4626SubParser.sol";
 import {
@@ -10,7 +10,7 @@ import {
     INTEGRITY_FUNCTION_POINTERS,
     SUB_PARSER_WORD_PARSERS,
     OPERAND_HANDLER_FUNCTION_POINTERS
-} from "../../../src/generated/ERC4626Words.pointers.sol";
+} from "../../../src/generated/ERC4626WordsPointers.sol";
 
 contract ERC4626WordsLengthConstantsTest is Test {
     function testOpcodeLengthEqualsSubParserLength() external pure {

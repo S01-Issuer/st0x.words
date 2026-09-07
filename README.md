@@ -97,7 +97,7 @@ nix run .#erc4626-words-prelude
 nix develop github:rainlanguage/rainix#sol-shell -c forge script script/Build.sol
 ```
 
-The generated files `src/generated/ERC4626Words.pointers.sol` and
+The generated files `src/generated/ERC4626WordsPointers.sol` and
 `meta/ERC4626Words.rain.meta` must be committed. The **Git is clean** CI job
 calls the reusable `rainix-copy-artifacts` workflow, which re-runs these steps
 and fails with `git diff --exit-code` if any committed file has drifted.
