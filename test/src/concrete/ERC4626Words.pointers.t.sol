@@ -3,9 +3,11 @@
 pragma solidity =0.8.25;
 
 import {Test} from "forge-std-1.16.1/src/Test.sol";
+import {LibRainDeploy} from "rain-deploy-0.1.4/src/lib/LibRainDeploy.sol";
 import {ERC4626Words} from "../../../src/concrete/ERC4626Words.sol";
 import {
     BYTECODE_HASH,
+    DEPLOYED_ADDRESS,
     OPCODE_FUNCTION_POINTERS,
     INTEGRITY_FUNCTION_POINTERS,
     SUB_PARSER_WORD_PARSERS,
@@ -24,6 +26,18 @@ contract ERC4626WordsPointersTest is Test {
 
     function testBytecodeHashMatchesDeployedCode() external view {
         assertEq(address(words).codehash, BYTECODE_HASH, "BYTECODE_HASH is stale");
+    }
+
+    /// @notice The committed deploy address is the Zoltu address of the source
+    /// in this checkout. Deploying the current creation code through an etched
+    /// Zoltu factory must land on exactly the committed constant, so the deploy
+    /// script's target and the source it deploys can never disagree. Local
+    /// only: no fork, no chain, no assertion about any network.
+    function testDeployedAddressMatchesCurrentSource() external {
+        LibRainDeploy.etchZoltuFactory(vm);
+        address deployed = LibRainDeploy.deployZoltu(type(ERC4626Words).creationCode);
+        assertEq(deployed, DEPLOYED_ADDRESS, "DEPLOYED_ADDRESS is stale");
+        assertEq(deployed.codehash, BYTECODE_HASH, "BYTECODE_HASH is stale for the Zoltu deploy");
     }
 
     function testOpcodeFunctionPointersMatchCommitted() external view {
