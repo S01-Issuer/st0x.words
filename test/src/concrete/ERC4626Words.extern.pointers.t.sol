@@ -2,18 +2,18 @@
 // SPDX-FileCopyrightText: Copyright (c) 2020 Rain Open Source Software Ltd
 pragma solidity =0.8.25;
 
-import {Test} from "forge-std-1.16.1/src/Test.sol";
+import {Test} from "forge-std-1.16.2/src/Test.sol";
 import {ERC4626Words} from "../../../src/concrete/ERC4626Words.sol";
 import {
     OPCODE_FUNCTION_POINTERS,
     INTEGRITY_FUNCTION_POINTERS,
     SUB_PARSER_WORD_PARSERS,
     OPERAND_HANDLER_FUNCTION_POINTERS
-} from "../../../src/generated/ERC4626Words.pointers.sol";
+} from "../../../src/generated/ERC4626WordsPointers.sol";
 import {OPCODE_FUNCTION_POINTERS_LENGTH} from "../../../src/abstract/ERC4626Extern.sol";
 import {LibOpERC4626ConvertToAssets} from "../../../src/lib/op/erc4626/LibOpERC4626ConvertToAssets.sol";
 import {LibOpERC4626ConvertToShares} from "../../../src/lib/op/erc4626/LibOpERC4626ConvertToShares.sol";
-import {OperandV2} from "rain-interpreter-interface-0.1.0/src/interface/IInterpreterV4.sol";
+import {OperandV2} from "rainlang-interface-0.2.8/src/interface/IInterpreterV4.sol";
 
 contract ERC4626WordsExternPointersTest is Test {
     ERC4626Words internal words;
