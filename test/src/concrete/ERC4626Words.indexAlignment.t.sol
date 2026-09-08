@@ -6,7 +6,7 @@ import {Test} from "forge-std-1.16.1/src/Test.sol";
 import {
     OPCODE_ERC4626_CONVERT_TO_ASSETS,
     OPCODE_ERC4626_CONVERT_TO_SHARES,
-    OPCODE_FUNCTION_POINTERS_LENGTH
+    ERC4626_WORD_COUNT
 } from "../../../src/abstract/ERC4626Extern.sol";
 import {
     SUB_PARSER_WORD_ERC4626_CONVERT_TO_ASSETS,
@@ -42,9 +42,9 @@ contract ERC4626WordsIndexAlignmentTest is Test {
 
     function testOpcodeLengthMatchesSubParserWordLength() external pure {
         assertEq(
-            OPCODE_FUNCTION_POINTERS_LENGTH,
+            ERC4626_WORD_COUNT,
             SUB_PARSER_WORD_PARSERS_LENGTH,
-            "OPCODE_FUNCTION_POINTERS_LENGTH must equal SUB_PARSER_WORD_PARSERS_LENGTH"
+            "ERC4626_WORD_COUNT must equal SUB_PARSER_WORD_PARSERS_LENGTH"
         );
     }
 
@@ -58,7 +58,7 @@ contract ERC4626WordsIndexAlignmentTest is Test {
     function testOpcodeFunctionPointersByteLengthMatchesCount() external pure {
         assertEq(
             OPCODE_FUNCTION_POINTERS.length,
-            OPCODE_FUNCTION_POINTERS_LENGTH * 2,
+            ERC4626_WORD_COUNT * 2,
             "OPCODE_FUNCTION_POINTERS must be exactly 2 bytes per opcode"
         );
     }
@@ -66,7 +66,7 @@ contract ERC4626WordsIndexAlignmentTest is Test {
     function testIntegrityFunctionPointersByteLengthMatchesCount() external pure {
         assertEq(
             INTEGRITY_FUNCTION_POINTERS.length,
-            OPCODE_FUNCTION_POINTERS_LENGTH * 2,
+            ERC4626_WORD_COUNT * 2,
             "INTEGRITY_FUNCTION_POINTERS must be exactly 2 bytes per opcode"
         );
     }
